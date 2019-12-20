@@ -1,0 +1,23 @@
+﻿  Algorithm.cpp
+C:\Users\ThinkPad\Desktop\Thesis\Codes\Thesis-Heuristic\Thesis-Heuristic\Parameters.h(14,24): warning C4305: 'initializing': truncation from 'double' to 'float'
+C:\Users\ThinkPad\Desktop\Thesis\Codes\Thesis-Heuristic\Thesis-Heuristic\MinimumSpanningTree.h(56,16): warning C4018: '<': signed/unsigned mismatch
+C:\Users\ThinkPad\Desktop\Thesis\Codes\Thesis-Heuristic\Thesis-Heuristic\MinimumSpanningTree.h(68,21): warning C4018: '<': signed/unsigned mismatch
+C:\Users\ThinkPad\Desktop\Thesis\Codes\Thesis-Heuristic\Thesis-Heuristic\MinimumSpanningTree.h(80,20): warning C4018: '<': signed/unsigned mismatch
+C:\Users\ThinkPad\Desktop\Thesis\Codes\Thesis-Heuristic\Thesis-Heuristic\InitRandPopulation.h(6,10): warning C4067: unexpected tokens following preprocessor directive - expected a newline
+C:\Users\ThinkPad\Desktop\Thesis\Codes\Thesis-Heuristic\Thesis-Heuristic\InitRandPopulation.h(7,10): warning C4067: unexpected tokens following preprocessor directive - expected a newline
+C:\Users\ThinkPad\Desktop\Thesis\Codes\Thesis-Heuristic\Thesis-Heuristic\Algorithm.cpp(9,10): warning C4067: unexpected tokens following preprocessor directive - expected a newline
+C:\Users\ThinkPad\Desktop\Thesis\Codes\Thesis-Heuristic\Thesis-Heuristic\Algorithm.cpp(10,10): warning C4067: unexpected tokens following preprocessor directive - expected a newline
+C:\Users\ThinkPad\Desktop\Thesis\Codes\Thesis-Heuristic\Thesis-Heuristic\Functions.h(2,10): warning C4067: unexpected tokens following preprocessor directive - expected a newline
+C:\Users\ThinkPad\Desktop\Thesis\Codes\Thesis-Heuristic\Thesis-Heuristic\Functions.h(3,10): warning C4067: unexpected tokens following preprocessor directive - expected a newline
+C:\Users\ThinkPad\Desktop\Thesis\Codes\Thesis-Heuristic\Thesis-Heuristic\Functions.h(7,13): warning C4244: 'return': conversion from 'double' to 'float', possible loss of data
+C:\Users\ThinkPad\Desktop\Thesis\Codes\Thesis-Heuristic\Thesis-Heuristic\Functions.h(157,49): warning C4244: '=': conversion from 'double' to 'float', possible loss of data
+C:\Users\ThinkPad\Desktop\Thesis\Codes\Thesis-Heuristic\Thesis-Heuristic\Functions.h(237,13): warning C4244: '=': conversion from 'int' to 'float', possible loss of data
+C:\Users\ThinkPad\Desktop\Thesis\Codes\Thesis-Heuristic\Thesis-Heuristic\Functions.h(238,13): warning C4244: '=': conversion from 'int' to 'float', possible loss of data
+C:\Users\ThinkPad\Desktop\Thesis\Codes\Thesis-Heuristic\Thesis-Heuristic\Functions.h(234,13): warning C4101: 'm': unreferenced local variable
+C:\Users\ThinkPad\Desktop\Thesis\Codes\Thesis-Heuristic\Thesis-Heuristic\Functions.h(234,16): warning C4101: 'n': unreferenced local variable
+C:\Users\ThinkPad\Desktop\Thesis\Codes\Thesis-Heuristic\Thesis-Heuristic\Functions.h(409,12): warning C4101: 'k': unreferenced local variable
+C:\Users\ThinkPad\Desktop\Thesis\Codes\Thesis-Heuristic\Thesis-Heuristic\Functions.h(409,9): warning C4101: 'j': unreferenced local variable
+C:\Users\ThinkPad\Desktop\Thesis\Codes\Thesis-Heuristic\Thesis-Heuristic\Algorithm.cpp(22,12): warning C4244: 'argument': conversion from 'time_t' to 'unsigned int', possible loss of data
+C:\Users\ThinkPad\Desktop\Thesis\Codes\Thesis-Heuristic\Thesis-Heuristic\Algorithm.cpp(29,10): warning C4101: 'err': unreferenced local variable
+C:\Users\ThinkPad\Desktop\Thesis\Codes\Thesis-Heuristic\Thesis-Heuristic\Functions.h(171): warning C4172: returning address of local variable or temporary: b
+  Thesis-Heuristic.vcxproj -> C:\Users\ThinkPad\Desktop\Thesis\Codes\Thesis-Heuristic\Debug\Thesis-Heuristic.exe
