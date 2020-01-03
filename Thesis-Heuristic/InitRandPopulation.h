@@ -8,18 +8,11 @@
 
 using namespace std;
 
-float randomLocation(float minLoc, float maxLoc) {					//Generate random float numbers for locations
-	float number = 0.0;
-	return number = minLoc + static_cast <float> (rand()) / (static_cast <float> (RAND_MAX / (maxLoc - minLoc))); //!!!!Delete int expression!!!!!
-}
+float randomLocation(float minLoc, float maxLoc); // Generate random locations
 
-int randomNumFacility(int maxFacility) {							//Generate random integer numbers for initial facility numbers in Solutions
-	int number = 0;
-	
-	return number= 1 + static_cast <int> (rand()) / (static_cast <int> (RAND_MAX / (maxFacility - 1)));
-}
+int randomNumFacility(int maxFacility, int minInitFacility);			 // Generate random number of facilities
 
-void initPopulation(population* pop_ptr);
+void initPopulation(population* pop_ptr);		 // Locate random number of faciilities to random locations for each individual
 
 void initPopulation(population* pop_ptr)
 {
@@ -29,7 +22,7 @@ void initPopulation(population* pop_ptr)
 
 	for (int i = 0; i < popSize; i++)
 	{
-		temp_numFac = randomNumFacility(maxInitFacility);
+		temp_numFac = randomNumFacility(maxInitFacility, minInitFacility);
 
 		for (int j = 0; j < temp_numFac; j++)
 		{
@@ -45,3 +38,13 @@ void initPopulation(population* pop_ptr)
 	pop_ptr->ind_ptr = &(pop_ptr->ind[0]);
 }
 
+float randomLocation(float minLoc, float maxLoc) {					//Generate random float numbers for locations
+	float number = 0.0;
+	return number = minLoc + static_cast <float> (rand()) / (static_cast <float> (RAND_MAX / (maxLoc - minLoc))); //!!!!Delete int expression!!!!!
+}
+
+int randomNumFacility(int maxFacility,int minInitFacility) {							//Generate random integer numbers for initial facility numbers in Solutions
+	int number = 0;
+
+	return number = minInitFacility + static_cast <int> (rand()) / (static_cast <int> (RAND_MAX / (maxFacility - minInitFacility)));
+}

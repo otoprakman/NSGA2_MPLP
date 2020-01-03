@@ -1,121 +1,89 @@
-/*This is the file to get the different individuals selected*/
+﻿/*This is the file to get the different individuals selected*/
 
-void nselect(population *old_pop_ptr,population *pop2_ptr);
+std::default_random_engine generator;
+std::uniform_real_distribution<> distribution(0,1);
 
-void nselect(population *old_pop_ptr,population *pop2_ptr)
+void nselect(population* old_pop_ptr, matepopulation* pop2_ptr);
+
+individual* selectParent(population* pop_ptr);
+
+
+/********************************************************/
+
+
+individual* selectParent(population* pop_ptr)       //Select parent randomly;
 {
-  int *fit_ptr1,*fit_ptr2;
+    float rnd = distribution(generator)*popSize;
+    int index = round(rnd);
+ 
+    if (index == popSize) pop_ptr->ind_ptr = &(pop_ptr->ind[index - 1]);
+         else pop_ptr->ind_ptr = &(pop_ptr->ind[index]);
 
-  float rnd2,*f1_ptr,*f2_ptr;
-  
-  int *s1_ptr,*s2_ptr,*select_ptr,*ptry;
-  float *select_ptr_r, *s1_ptr_r, *s2_ptr_r;
-  
-  void *j,*j1;
-  
-  int c,i,rnd,rnd1,k,n,j2,r,s,r1;
+    return pop_ptr->ind_ptr;
+}
+
+
+void nselect(population* old_pop_ptr, matepopulation* pop2_ptr)
+{
+    int* fit_ptr1, * fit_ptr2;
+    individual* parent1, *parent2;
+
+  float *f1_ptr,*f2_ptr;
   
   old_pop_ptr->ind_ptr = &(old_pop_ptr->ind[0]);
   
   pop2_ptr->ind_ptr= &(pop2_ptr->ind[0]); 
-  
-  j =  &(old_pop_ptr->ind[popsize-1]);
-  
-  old_pop_ptr->ind_ptr = &(old_pop_ptr->ind[0]); 
-  j2 = 0;
-  r = popsize;
-  s = chrom;
-  
-  for(n = 0,k = 0;n < popsize;n++,k++)
+
+
+  for(int n = 0; n<2*popSize; n++)
     {
-      pop2_ptr->ind_ptr = &(pop2_ptr->ind[k]);
-      select_ptr = &(pop2_ptr->ind_ptr->genes[0]);
-      select_ptr_r = &(pop2_ptr->ind_ptr->xreal[0]);
+      /*Select first parent randomly*/
+      do
+      {
+          parent1 = selectParent(old_pop_ptr);
+      } while (parent1->numFac > maxlimit_facility || (parent1->numFac <= minlimit_facility));
 
-      rnd2 = randomperc(); 
-
-      rnd2 = popsize* rnd2; 
-
-      rnd = floor(rnd2);
-
-      if(rnd == 0)
-	rnd = popsize - k;
-
-      if(rnd == popsize)
-	rnd = (popsize-2)/2;
-      
-      /*Select first parent randomly*/	
-      j = &(old_pop_ptr->ind[rnd-1]);
-      
-      rnd2 = randomperc(); 
-      
-      rnd2 = popsize * rnd2; 
-      
-      rnd1 = floor(rnd2);
-      
-      if (rnd1 == 0)
-	rnd1 = popsize - n;
-
-      if(rnd1 == popsize)
-	rnd1 = (popsize - 4)/2;
-      
-      
       /*Select second parent randomly*/
-      j1 = &(old_pop_ptr->ind[rnd1-1]);
+      do
+      {
+          parent2 = selectParent(old_pop_ptr);
+
+      } while ((parent2->numFac > maxlimit_facility) || (parent2->numFac <= minlimit_facility));
+         
+      old_pop_ptr->ind_ptr = parent1;
       
-      old_pop_ptr->ind_ptr = j;
-      
-      s1_ptr = &(old_pop_ptr->ind_ptr->genes[0]);
-      s1_ptr_r = &(old_pop_ptr->ind_ptr->xreal[0]);
       fit_ptr1 = &(old_pop_ptr->ind_ptr->rank);
+     // printf("Rank1:%d--%d\n", parent1->numDC, *fit_ptr1);
       f1_ptr = &(old_pop_ptr->ind_ptr->cub_len);
-      
-      old_pop_ptr->ind_ptr = j1;
-      s2_ptr = &(old_pop_ptr->ind_ptr->genes[0]);
-      s2_ptr_r = &(old_pop_ptr->ind_ptr->xreal[0]);
+    
+      old_pop_ptr->ind_ptr = parent2;
+
       fit_ptr2 = &(old_pop_ptr->ind_ptr->rank);
+      //printf("Rank2:%d--%d\n",parent2->numDC, *fit_ptr2);
       f2_ptr = &(old_pop_ptr->ind_ptr->cub_len);
 /*--------------------------------------------------------------------------*/
-      
+ //         HANGI INDIVIDUAL'LARI GÖRMEK İÇİN YAZDIRIYORUM
+ /*         printf("Cost:%d-Coverage:%d-NumFac:%d-Rank:%d-Crowding:%f\nCost:%d-Coverage:%d-NumFac:%d-Rank:%d-Crowding:%f\n",
+              parent1->fitness[0], parent1->fitness[1], parent1->numFac, parent1->rank, parent1->cub_len,
+              parent2->fitness[0], parent2->fitness[1], parent2->numFac, parent2->rank, parent2->cub_len);
+ */
 /*------------------SELECTION PROCEDURE------------------------------------*/
       
       /*Comparing the fitnesses*/
       
-      if(*fit_ptr1 > *fit_ptr2)
-	{
-	  for(i = 0;i < chrom;i++)
-	    *select_ptr++=*s2_ptr++;
-	  for(i = 0;i < nvar;i++)
-	    *select_ptr_r++=*s2_ptr_r++;
-	}
-      else
-	{
-	  if(*fit_ptr1 < *fit_ptr2)
-	    {
-	      for(i = 0;i < chrom;i++)
-		*select_ptr++=*s1_ptr++;
-	      for(i = 0;i < nvar;i++)
-		*select_ptr_r++=*s1_ptr_r++;
-	    }
-	  else
-	    {
-	      if(*f1_ptr < *f2_ptr)
-		{
-		  for(i = 0;i < chrom;i++)
-		    *select_ptr++=*s2_ptr++;
-		  for(i = 0;i < nvar;i++)
-		    *select_ptr_r++=*s2_ptr_r++;
-		}
-	      else
-		{
-		  for(i = 0;i < chrom;i++)
-		    *select_ptr++=*s1_ptr++;
-		  for(i = 0;i < nvar;i++)
-		    *select_ptr_r++=*s1_ptr_r++;
-		}
-	    }
-	}
-    }
+      if(*fit_ptr1 > *fit_ptr2) pop2_ptr->ind[n] = *parent2;
+         else{
+	        if(*fit_ptr1 < *fit_ptr2) pop2_ptr->ind[n] = *parent1; 
+	        else
+	        {
+	            if(*f1_ptr <= *f2_ptr) pop2_ptr->ind[n] = *parent2;  /// *orjinalde parent1 olması gerekiyor ancak extreme soln'lar en yüksek cub_len atanıyor algoritmada
+	            else pop2_ptr->ind[n] = *parent1;
+	        }
+	     } //end if
+ /*     printf("(Selected)Cost:%d-Coverage:%d-NumFac:%d,Crowding:%f\n",
+          pop2_ptr->ind[n].fitness[0], pop2_ptr->ind[n].fitness[1], pop2_ptr->ind[n].numFac, pop2_ptr->ind[n].cub_len);*/
+    }//end for
+ 
   return;
 }
 

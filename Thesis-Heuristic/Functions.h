@@ -2,6 +2,47 @@
 #include "Parameters.h";
 #include "MinimumSpanningTree.h";
 
+
+void printExecTime(float start, float stop, FILE* loc);		// Print Execution Time of a function
+
+float findDistance(float a1, float a2, float b1, float b2); // Find Eucledean Distances
+
+void findCoverage(population* pop_ptr);						// Find Coverage of a Facility
+
+void find_numDC(population* pop_ptr);						// Find number of DC-RS and Cost value
+
+int findCoverage_facility(facility a);						// Find coverage of a single facility using in crossover
+
+facility affine_comb(facility* a, facility* b);				// Affine Combination of two facilities- generate only one facility
+
+facility* offspring_facility(facility a[], int size);		// Create offspring using cartesian product of two individuals
+
+individual combine_ind(individual* a, individual* b, individual* offspring_fac); // Generate new offspring from two individuals
+
+void crossover(matepopulation* pop_ptr, population* new_pop_ptr, FILE* writer); // Create new population from matepopulation
+
+int indcmp(int* ptr1, int* ptr2);							/*Routine comparing the two individuals in terms of cost and coverage objectives*/
+
+void ranking(population* pop_ptr);							// Ranking individuals of population to create fronts
+
+void find_numFac(population* pop_ptr);						//find number of facilities of individuals in a population
+
+void findCrowding(population* pop_ptr, int rnk);			//Find crowding distances after ranking individuals
+
+void sort(int numInd);										/*Sort the arrays in ascending order of the fitness*/
+
+//##########################################################################
+//#########################  FUNCTIONS  #################################//
+//##########################################################################
+
+
+void printExecTime(float start, float stop, FILE* loc)
+{
+	float time_taken = float(stop - start) / float(CLOCKS_PER_SEC);
+	fprintf(loc, "%f\n", time_taken);
+}
+
+
 float findDistance(float a1, float a2, float b1, float b2)
 {	/*Find Euclidean Distances Between two Locations*/
 	return sqrt(pow(a1 - b1, 2) + pow(a2 - b2, 2) * 1.0);
@@ -28,7 +69,7 @@ void findCoverage(population* pop_ptr) {
 				if (findDistance(demand_ptr->CoordX[j],
 					demand_ptr->CoordY[j],
 					pop_ptr->ind_ptr->facility_ptr->CoordX,
-					pop_ptr->ind_ptr->facility_ptr->CoordY) < fd)
+					pop_ptr->ind_ptr->facility_ptr->CoordY) <= fd)
 				{
 					coverage = coverage + demand_ptr->Value[j];
 					break;
@@ -76,30 +117,6 @@ void find_numDC(population* pop_ptr) {
 	}	
 }
 
-
-void select(population* old_pop_ptr, population* pop2_ptr)		//OLD-DATED SELECTION PROCEDURE
-{
-	pop2_ptr->ind_ptr = &(pop2_ptr->ind[0]);
-	
-	int q = 0;
-
-	for (int i = 0; i < popSize; i++)
-	{
-		old_pop_ptr->ind_ptr = &(old_pop_ptr->ind[i]);
-		
-		if (old_pop_ptr->ind_ptr->rank==1)
-		{
-			*pop2_ptr->ind_ptr = *old_pop_ptr->ind_ptr;
-			for (int j = 0; j < old_pop_ptr->ind_ptr->numFac; j++)
-			{
-				pop2_ptr->ind_ptr->facilitySet[j].CoordX = old_pop_ptr->ind_ptr->facilitySet[j].CoordX;
-			}
-			q += 1;
-			pop2_ptr->ind_ptr = &(pop2_ptr->ind[q]);
-		}
-	}
-}
-
 int findCoverage_facility(facility a)
 {
 	int coverage = 0;
@@ -121,53 +138,85 @@ int findCoverage_facility(facility a)
 facility affine_comb(facility* a, facility* b) 
 {
 	facility c;
-
-	std::default_random_engine generator;
+	std::random_device random_device;
+	std::mt19937 random_engine(random_device());
 	std::normal_distribution<float> distribution(mu, sigma);
 
-	float beta = distribution(generator);
+	do
+	{
+		float beta = distribution(random_engine);
 
-	c.CoordX = a->CoordX * beta + b->CoordX * (1 - beta);
-	c.CoordY = a->CoordY * beta + b->CoordY * (1 - beta);
+		c.CoordX = a->CoordX * beta + b->CoordX * (1 - beta);
+		c.CoordY = a->CoordY * beta + b->CoordY * (1 - beta);
+		/*if (c.CoordX < 0.0 || c.CoordY < 0.0) printf("(Beta:%f)Minus location Detected X:%f - Y:%f !!\n", beta, c.CoordX, c.CoordY);
+		printf("Beta:%f\n", beta);*/
+	} while (c.CoordX < 0.0 || c.CoordY < 0.0 || c.CoordX>10.0 || c.CoordY>10.0);
+
+
+	/*printf("RETURNED X:%f Y:%f\n", c.CoordX, c.CoordY);*/
+
 	return c;
 }
 
-facility* offspring_facility(facility a[], int size)   // Create offspring using cartesian product of two individuals
+facility* offspring_facility(facility a[], int size)   
 {
 	float temp_probSet[max_numFac];
-	int temp_covSet[max_numFac];		//Change sie of array, it should be greater than max_numFac (size > max_numFac)
+	int temp_covSet[max_numFac];		//Change size of array, it should be greater than max_numFac (size > max_numFac)
 	facility b[max_numFac];
 	int k = 0;
 
 	for (int i = 0; i < size; i++)
 	{
 		temp_covSet[i] = findCoverage_facility(a[i]);
-		if (temp_covSet[i]==0)
-		{
-			printf("Zero Coverage detected and assigned to 1\n");
-			temp_covSet[i] = 1;
-		}
 	}
 
 	int min = *std::min_element(temp_covSet, temp_covSet + size);
 	int max = *std::max_element(temp_covSet, temp_covSet + size);
-
-	for (int j = 0; j < size; j++)
+	/*printf("Max:%d Min:%d\n", max, min);*/
+	if (max==min)
 	{
-		temp_probSet[j] = 1.00*(temp_covSet[j] - min) / (max - min);
-		
-		float rnd = static_cast <float> (rand()) / (static_cast <float> (RAND_MAX));
-
-		if (rnd<= temp_probSet[j])
+		for (int i = 0; i < size; i++)
 		{
-			b[k] = a[j];
-			k += 1;			
+			temp_probSet[i] = 1.0;
+
+
+			float rnd = static_cast <float> (rand()) / (static_cast <float> (RAND_MAX));
+
+			if (rnd <= temp_probSet[i])
+			{
+				b[k] = a[i];
+				//printf("Prob: %f--Selected: %f\n", temp_probSet[j],b[k].CoordX);
+				k += 1;
+			}
+			/*printf("Prob: %f\n", temp_probSet[i]);
+			if (i == size - 1)
+			{
+				printf("******\n");
+			}*/
+		}
+
+	}
+	else
+	{
+		for (int j = 0; j < size; j++)
+		{
+			temp_probSet[j] = 1.00 * (temp_covSet[j] - min) / (max - min);
+			/*printf("Prob: %f\n", temp_probSet[j]);
+			if (j == size - 1)
+			{
+				printf("******\n");
+			}*/
+			float rnd = static_cast <float> (rand()) / (static_cast <float> (RAND_MAX));
+
+			if (rnd <= temp_probSet[j])
+			{
+				b[k] = a[j];
+				//printf("Prob: %f--Selected: %f\n", temp_probSet[j],b[k].CoordX);
+				k += 1;
+			}
 		}
 	}
-	for (int i = 0; i < max_numFac; i++)
-	{
-		
-	}
+
 	return b;
 }
 
@@ -175,7 +224,7 @@ facility* offspring_facility(facility a[], int size)   // Create offspring using
 individual combine_ind(individual* a, individual* b, individual* offspring_fac)
 {
 	facility temp_facilitySet[max_numFac];
-	int k = 0;
+	int k = 0;		
 
 	for (int i = 0; i < a->numFac; i++)
 	{
@@ -185,48 +234,54 @@ individual combine_ind(individual* a, individual* b, individual* offspring_fac)
 		{
 			b->facility_ptr = &(b->facilitySet[j]);
 			temp_facilitySet[k] = affine_comb(a->facility_ptr, b->facility_ptr);
-			k += 1;
+			//if (temp_facilitySet[k].CoordX < 0.0) break;
+			k += 1;			
 		}
+
+		//if (temp_facilitySet[k-1].CoordX < 0.0) break;
 	}
 
-	if (k != 1)
+	if (k >= 1)
 	{
 		offspring_fac->facility_ptr = offspring_facility(temp_facilitySet, k);
 
 		for (int i = 0; i < max_numFac; i++)
 		{
 			offspring_fac->facilitySet[i] = *offspring_fac->facility_ptr;
-			offspring_fac->facility_ptr += 1;
+			offspring_fac->facility_ptr ++;
 		}
-		
 	}
+	//if (k == 1) offspring_fac->facilitySet[0]=temp_facilitySet[0];
+
 	return *offspring_fac;
 }
 
-void crossover(population* pop_ptr, population* new_pop_ptr) 
+void crossover(matepopulation* matepop_ptr, population* new_pop_ptr,FILE* writer) 
 {
 	int k = 0;
-	
-	for (int i = 0; i < popSize; i++)			// UNN. # of LOOP!!!!!
+
+	for (int i = 0; i < 2*popSize; i+=2)
 	{
-		for (int j = 0; j < popSize; j++)		// UNN. # of LOOP!!!!!
+
+		individual* temp_ptr = &(matepop_ptr->ind[i]);
+		matepop_ptr->ind_ptr = &(matepop_ptr->ind[i+1]);
+		new_pop_ptr->ind_ptr = &(new_pop_ptr->ind[k]);
+		
+		/* write 10 lines of text into the file stream*/
+//		fprintf(writer, "Parent 1:%d-Parent 2:%d\n", temp_ptr->numFac, matepop_ptr->ind_ptr->numFac);
+
+		new_pop_ptr->ind[k] = combine_ind(matepop_ptr->ind_ptr, temp_ptr, new_pop_ptr->ind_ptr);
+
+		if (new_pop_ptr->ind[k].facilitySet[0].CoordX<0)
 		{
+			printf("ZERO FACILITY INDEX: %d-- %f\n", k+1, new_pop_ptr->ind[k].facilitySet[0].CoordX);
+		}
 
-			if (pop_ptr->ind[i].rank == 1 && pop_ptr->ind[j].rank == 1 && i!=j) 
-			{
-				individual* temp_ptr = &(pop_ptr->ind[j]);
-				pop_ptr->ind_ptr = &(pop_ptr->ind[i]);
-				new_pop_ptr->ind_ptr = &(new_pop_ptr->ind[k]);
 
-				new_pop_ptr->ind[k] = combine_ind(pop_ptr->ind_ptr, temp_ptr, new_pop_ptr->ind_ptr); 
-				k += 1;
-			}
-		}	
+		k += 1;		
 	}
-	
 }
 
-/*Routine Comparing the two individuals*/
 
 int indcmp(int* ptr1, int* ptr2)
 {
@@ -262,11 +317,11 @@ void ranking(population* pop_ptr)
 		rnk,           /*rank*/
 		val,           /*value obtained after comparing two individuals*/
 		nondom,        /*no of non dominated members*/
-		maxrank1,      /*Max rank of the population*/
-		rankarr[maxpop]; /*Array storing the individual number at a rank*/
+		maxrank1;      /*Max rank of the population*/
 
 
-	int* ptr1, * ptr2;
+	int * ptr1,		//Pointers for objective values
+		* ptr2;		
 
 	/*------------------------------* RANKING *------------------------------*/
 
@@ -286,7 +341,13 @@ void ranking(population* pop_ptr)
 		and max fitness of the next ranked individuals*/
 
 		/*Initializing all the flags to 2*/
-
+			
+			/* Meaning of flag;
+			   0: Dominated individual
+			   1: Assigned a rank 
+			   2: Not ranked
+			   3: not comparable
+			*/
 	for (int i = 0; i < popSize; i++)
 	{
 		pop_ptr->ind[i].flag = 2;
@@ -317,9 +378,9 @@ void ranking(population* pop_ptr)
 
 			pop_ptr->ind_ptr = &(pop_ptr->ind[i]);
 
-			if (pop_ptr->ind_ptr->flag != 1 && pop_ptr->ind_ptr->flag != 0)
+			if (pop_ptr->ind_ptr->flag != 1 && pop_ptr->ind_ptr->flag != 0) // select if not dominated and not assigned
 			{
-				ptr1 = &(pop_ptr->ind_ptr->fitness[0]);
+				ptr1 = &(pop_ptr->ind_ptr->fitness[0]); //Get cost objective
 				
 				for ( j = 0; j < popSize; j++)
 				{
@@ -367,17 +428,18 @@ void ranking(population* pop_ptr)
 					/*Assign the rank and set the flag*/
 					pop_ptr->ind[i].rank = rnk;
 					pop_ptr->ind[i].flag = 1;
-					rankarr[q] = i;
+					pop_ptr->rankindices[rnk - 1][q] = i;
 					q++;
 				}
 			}       /*Loop over flag check ends*/
 		}           /*Loop over i ends */
+
 		pop_ptr->rankno[rnk - 1] = q;
+
 	}
+
 	maxrank1 = rnk;
-
 	
-
 	/* Find Max Rank of the population    */
 	for (int i = 0; i < popSize; i++)
 	{
@@ -389,42 +451,12 @@ void ranking(population* pop_ptr)
 
 	pop_ptr->maxrank = maxrank1;
 
-}
-
-
-
-/*This is the program used to evaluate the value of the function & errors
-************************************************************************/
-
-void func(population* pop_ptr)
-{
-	/*File ptr to the file to store the value of the g for last iteration
-	  g is the parameter required for a particular problem
-	  Every problem is not required*/
-
-	int* fitcost_ptr;	 /*Pointer to the array of fitness function*/
-	
-	int* fitcov_ptr;
-		
-	int i, j, k;
-	
-	pop_ptr->ind_ptr = &(pop_ptr->ind[0]);
-
-	/*Initializing the max rank to zero*/
-	pop_ptr->maxrank = 0;
-	for (i = 0; i < popSize; i++)
+	for (int i = 1; i <= maxrank1; i++)
 	{
-		pop_ptr->ind_ptr = &(pop_ptr->ind[i]);
-
-		fitcost_ptr = &(pop_ptr->ind_ptr->fitness[0]);
-		fitcov_ptr = &(pop_ptr->ind_ptr->fitness[1]);
+		findCrowding(pop_ptr, i);
 	}
-
-	/*---------------------------* RANKING *------------------------------*/
-
-	ranking(pop_ptr);
-
 }
+
 
 void find_numFac(population* pop_ptr) {
 	for (int i = 0; i < popSize; i++)
@@ -434,15 +466,98 @@ void find_numFac(population* pop_ptr) {
 
 		for (int j = 0; j < max_numFac; j++)
 		{
-			if (pop_ptr->ind_ptr->facilitySet[j].CoordX > 0)
+			if ((pop_ptr->ind_ptr->facilitySet[j].CoordX > 0) | (pop_ptr->ind_ptr->facilitySet[j].CoordY > 0))
 			{
 				pop_ptr->ind_ptr->numFac += 1;
 			}
-
 		}
 	}
 }
 
+float fpara1[maxpop][2];		//fitness values of individuals in the same rank
+
+void findCrowding(population* pop_ptr, int rnk)
+{
+
+	float length[maxpop][2],		//distances
+		   max;	
+	int i, j, numInd, a;
+	float min, Diff;				//Added 18.08.2003
+
+	numInd = pop_ptr->rankno[rnk - 1]; //Array holds number of individuals in the rank
+
+	for (j = 0; j < maxfun; j++)
+	{
+		for (i = 0; i < numInd; i++)
+		{
+			fpara1[i][0] = 0;	 //Initializing with 0's
+			fpara1[i][1] = 0;
+		}
+
+		for (i = 0; i < numInd; i++)
+		{
+			a = pop_ptr->rankindices[rnk - 1][i];
+			fpara1[i][0] = (float)a;				//[i][0/1] 0 is for indices, 1 is for length values
+			fpara1[i][1] = pop_ptr->ind[a].fitness[j];
+		}
+
+		sort(numInd); /*Sort the arrays in ascending order of the fitness*/
+
+		max = fpara1[numInd - 1][1];
+		min = fpara1[0][1];  // Added 18.08.2003
+		Diff = max - min;      // Added 18.08.2003 and 5 subsequent lines
+		if (Diff < 0.0)
+		{
+			printf("Something wrong in keepaliven.h\n");
+			exit(1);
+		}
+
+		for (i = 0; i < numInd; i++)
+		{
+			if (i == 0 || i == (numInd - 1))
+			{
+				length[i][0] = fpara1[i][0];
+				length[i][1] = 100 * max;
+			}
+			else
+			{
+				length[i][0] = fpara1[i][0];
+				length[i][1] = fabs(fpara1[i + 1][1] - fpara1[i - 1][1]) / (Diff + smallest); // crowding distances are normalized 18.08.2003
+			}
+		}
+		for (i = 0; i < numInd; i++)
+		{
+			a = length[i][0];
+			pop_ptr->ind[a].cub_len += length[i][1];
+
+		}
+	}
+
+	return;
+}
+
+
+void sort(int numInd)
+{
+	float temp, temp1;
+	int i1, j1, k1;
+	for (k1 = 0; k1 < numInd - 1; k1++)
+	{
+		for (i1 = k1 + 1; i1 < numInd; i1++)
+		{
+			if (fpara1[k1][1] > fpara1[i1][1])
+			{
+				temp = fpara1[k1][1];
+				temp1 = fpara1[k1][0];
+				fpara1[k1][1] = fpara1[i1][1];
+				fpara1[k1][0] = fpara1[i1][0];
+				fpara1[i1][1] = temp;
+				fpara1[i1][0] = temp1;
+			}
+		}
+	}
+	return;
+}
 
 
 
