@@ -1,8 +1,5 @@
 ﻿#include <time.h>
 #include <ctime> 
-#include <sstream>
-#include <stdio.h>
-#include <stdlib.h>
 #include <math.h>
 #include "MinimumSpanningTree.h"
 #include "InitRandPopulation.h"
@@ -10,6 +7,7 @@
 #include "Functions.h";
 #include "select.h";
 #include "keepaliven.h";
+#include "ReadWriteFiles.h";
 
 using namespace std;
 
@@ -25,56 +23,7 @@ int main(int, char**)
 	
 	clock_t start, end;
 
-
-	FILE
-		* value,
-		* coordX,
-		* coordY,
-		* writer,
-		*writeCost,
-		*writeCoverage,
-		*writeSumFacility; 
-
-	FILE
-		* selectTime,
-		* crossoverTime,
-		* findValueTime,
-		* keepAliveTime,
-		* deleteOldTime,
-		* copyNewGenTime;
-
-
-	/* open the file for writing*/
-	writer = fopen("FacilityNumberAfterCrossover.txt", "w");
-	writeCost = fopen("C:\\Users\\ThinkPad\\Desktop\\Thesis\\Codes\\Visualization_Algorithms\\HeuristicCost.txt", "w");
-	writeCoverage = fopen("C:\\Users\\ThinkPad\\Desktop\\Thesis\\Codes\\Visualization_Algorithms\\HeuristicCoverage.txt", "w");
-	writeSumFacility = fopen("SumFacility.txt", "w");
-	
-	
-	selectTime = fopen("selectTime.txt", "w");
-	crossoverTime = fopen("crossoverTime.txt", "w");
-	findValueTime = fopen("findValueTime.txt", "w");
-	keepAliveTime = fopen("keepAliveTime.txt", "w");
-	deleteOldTime = fopen("deleteOldTime.txt", "w");
-	copyNewGenTime = fopen("copyNewGenTime.txt", "w");
-
-	fopen_s(&value, "demand_value.txt", "r");
-	fopen_s(&coordX, "demand_coordX.txt", "r");
-	fopen_s(&coordY, "demand_coordY.txt", "r");
-	/*Opening the files*/
-
-	for (int i = 0; i < numDemand; i++)
-	{
-		
-		demand_ptr = &(demandSet);
-		fscanf(value, "%d\n", &(demand_ptr->Value[i]));
-		fscanf(coordX, "%f\n", &(demand_ptr->CoordX[i]));
-		fscanf(coordY, "%f\n", &(demand_ptr->CoordY[i]));
-		//printf("%f\n", demand_ptr->CoordX[i]);
-	}
-	fclose(value);
-	fclose(coordX);
-	fclose(coordY);
+	readWrite();						//Read Demand attributes from the file
 
 	old_pop_ptr = &(oldpop);
 	initPopulation(old_pop_ptr);		//Generate initial population
@@ -173,7 +122,7 @@ int main(int, char**)
 		*/
 
 		start = clock();
-
+		
 		crossover(mate_pop_ptr,new_pop_ptr,writer);	
 		
 		/* close the file*/
@@ -181,40 +130,53 @@ int main(int, char**)
 
 		printExecTime(start, end, crossoverTime);
 
-		
+	
+
 
 		///////DELETE
 		for (int i = 0; i < popSize; i++)
 		{
 			for (int j = 0; j < max_numFac; j++)
 			{
+
 				mate_pop_ptr->ind[i].facilitySet[j].CoordX = 0.0;
 				mate_pop_ptr->ind[i].facilitySet[j].CoordY = 0.0;
 			}
 		}
 
-		start = clock();
 		
 		new_pop_ptr = &(newpop);
 		find_numFac(new_pop_ptr);
+
 		int	sumFacility=0;
+		int max = 0;
+		int min = 999999;
 		for (int i=0, j= 0; i < popSize, j < 2*popSize; i++, j+=2)
 		{
 			sumFacility += new_pop_ptr->ind[i].numFac;
-			float ratio = ((float)new_pop_ptr->ind[i].numFac) / ((float)mate_pop_ptr->ind[j].numFac * (float)mate_pop_ptr->ind[j + 1].numFac);
+			if (new_pop_ptr->ind[i].numFac > max)
+			{
+				max = new_pop_ptr->ind[i].numFac;
+			}
+			if (new_pop_ptr->ind[i].numFac < min)
+			{
+				min = new_pop_ptr->ind[i].numFac;
+			}
+			//float ratio = ((float)new_pop_ptr->ind[i].numFac) / ((float)mate_pop_ptr->ind[j].numFac * (float)mate_pop_ptr->ind[j + 1].numFac);
 
-			fprintf(writer, "%f\n", 
-				ratio);
+			//fprintf(writer, "%f\n", ratio);
 		}
 
-		fprintf(writeSumFacility, "%d\n", sumFacility);
+		fprintf(writeSumFacility, "%d\t %d\t %d\n", sumFacility, max, min);
 
 		new_pop_ptr = &(newpop);
 		findCoverage(new_pop_ptr);			//Find coverage objective
 
+		start = clock();
+
 		new_pop_ptr = &(newpop);
 		find_numDC(new_pop_ptr);			//Find cost objective
-		
+
 		end = clock();
 
 		printExecTime(start, end, findValueTime);
@@ -246,6 +208,7 @@ int main(int, char**)
 			start = clock();
 			/*Elitism And Sharing Implemented*/
 			keepalive(old_pop_ptr, new_pop_ptr, last_pop_ptr, generation + 1); 
+			
 			end = clock();
 
 			printExecTime(start, end, keepAliveTime);
@@ -276,6 +239,9 @@ int main(int, char**)
 			printExecTime(start, end, deleteOldTime);
 
 			last_pop_ptr = &(lastpop);
+			
+			//Print Last Generation Solutions
+
 			if (generation==generationNum-1)
 			{
 				for (int i = 0; i < popSize; i++)
@@ -287,59 +253,23 @@ int main(int, char**)
 							i + 1, last_pop_ptr->rankno[i]);
 						fprintf(writeCost, "%d\n", -1*last_pop_ptr->ind[i].fitness[0]);
 						fprintf(writeCoverage, "%d\n", last_pop_ptr->ind[i].fitness[1]);
+						fprintf(writenumFac, "%d\n", last_pop_ptr->ind[i].numFac);
+						
+						for (int j = 0; j < last_pop_ptr->ind[i].numFac; j++)
+						{
+							fprintf(writeCoordX, "%f\n", last_pop_ptr->ind[i].facilitySet[j].CoordX);
+							fprintf(writeCoordY, "%f\n", last_pop_ptr->ind[i].facilitySet[j].CoordY);
+
+						}
 					}
 
 				} //Ranksize'ı sürekli üzerine yazdığım için hatalı gözüken sonuçlar verebilir. Kümülatif toplamları popSize'a eşit olana kadar doğru veriyor.
 
 			}
-				
-			
-			//for (int m = 0; m < 2 * popSize; m++)
-			//{
-			//	//printf("Crowding: %f\n", );
-
-			//}
-
-		//	/*------------------REPORT PRINTING--------------------------------*/
-		//	report(i, old_pop_ptr, mate_pop_ptr, rep_ptr, gen_ptr, lastit);
 
 		//	/*==================================================================*/
 
-		//	/*----------------Rank Ratio Calculation------------------------*/
-		//	new_pop_ptr = &(matepop);
-		//	old_pop_ptr = &(oldpop);
-
-		//	/*Finding the greater maxrank among the two populations*/
-
-		//	if (old_pop_ptr->maxrank > new_pop_ptr->maxrank)
-		//		maxrank1 = old_pop_ptr->maxrank;
-		//	else
-		//		maxrank1 = new_pop_ptr->maxrank;
-
-		//	fprintf(rep2_ptr, "--------RANK AT GENERATION %d--------------\n", i + 1);
-		//	fprintf(rep2_ptr, "Rank old ranks   new ranks     rankratio\n");
-
-		//	for (j = 0; j < maxrank1; j++)
-		//	{
-		//		/*Sum of the no of individuals at any rank in old population
-		//		  and the new populaion*/
-
-		//		tot = (old_pop_ptr->rankno[j]) + (new_pop_ptr->rankno[j]);
-
-		//		/*Finding the rank ratio for new population at this rank*/
-
-		//		new_pop_ptr->rankrat[j] = (new_pop_ptr->rankno[j]) / tot;
-
-		//		/*Printing this rank ratio to a file called ranks.dat*/
-
-		//		fprintf(rep2_ptr, " %d\t  %d\t\t %d\t %f\n", j + 1, old_pop_ptr->rankno[j], new_pop_ptr->rankno[j], new_pop_ptr->rankrat[j]);
-
-		//	}
-
-		//	fprintf(rep2_ptr, "-----------------Rank Ratio-------------------\n");
-		//	/*==================================================================*/
-
-			/*=======Copying the new population to old population======*/
+			/*=======Copying the New Population to Old Population======*/
 
 			old_pop_ptr = &(oldpop);
 			last_pop_ptr = &(lastpop);
@@ -394,92 +324,21 @@ int main(int, char**)
 			end = clock();
 
 			printExecTime(start, end, copyNewGenTime);
-
-			///*Copying the array having the record of the individual
-		 // at different ranks */
-			//for (int l = 0; l < popSize; l++)
-			//{
-			//	old_pop_ptr->rankno[l] = last_pop_ptr->rankno[l];
-			//}
-
-			///*Copying the maxrank */
-
-
-			///*Printing the fitness record for last generation in a file last*/
-			//if (i == gener - 1)
-			//{  // for the last generation 
-			//	mate_pop_ptr = &(matepop);
-			//	for (f = 0; f < popSize; f++) // for printing
-			//	{
-			//		old_pop_ptr->ind_ptr = &(mate_pop_ptr->ind[f]);
-
-			//		if ((old_pop_ptr->ind_ptr->error <= 0.0) && (old_pop_ptr->ind_ptr->rank == 1))  // for all feasible solutions and non-dominated solutions
-			//		{
-			//			for (l = 0; l < nfunc; l++)
-			//				fprintf(end_ptr, "%f\t", old_pop_ptr->ind_ptr->fitness[l]);
-			//			for (l = 0; l < ncons; l++)
-			//			{
-			//				fprintf(end_ptr, "%f\t", old_pop_ptr->ind_ptr->constr[l]);
-			//			}
-			//			if (ncons > 0)
-			//				fprintf(end_ptr, "%f\t", old_pop_ptr->ind_ptr->error);
-			//			fprintf(end_ptr, "\n");
-
-			//			if (nvar > 0)
-			//			{
-			//				for (l = 0; l < nvar; l++)
-			//				{
-			//					fprintf(g_var, "%f\t", old_pop_ptr->ind_ptr->xreal[l]);
-			//				}
-			//				fprintf(g_var, "  ");
-			//			}
-
-			//			if (nchrom > 0)
-			//			{
-			//				for (l = 0; l < nchrom; l++)
-			//				{
-			//					fprintf(g_var, "%f\t", old_pop_ptr->ind_ptr->xbin[l]);
-			//				}
-			//			}
-			//			fprintf(g_var, "\n");
-			//		} // feasibility check
-			//	} // end of f (printing)
-
-			/*if (generation == generationNum-1)
-			{
-				for (int i = 0; i < popSize; i++)
-				{
-						printf("LAST: %d-RS:%d DC:%d Fac:%d Cov:%d Cost:%d\n",
-							i, old_pop_ptr->ind[i].numRS, old_pop_ptr->ind[i].numDC,
-							old_pop_ptr->ind[i].numFac, old_pop_ptr->ind[i].fitness[1],
-							old_pop_ptr->ind[i].fitness[0]);
-				}
-			}*/
 				
 			printf("END-OF GENERATION: %d\n", generation + 1);
 	} // for the last generation
-		//}  // end of i 
 
 	 // /*                   Generation Loop Ends                                */
 	 // /************************************************************************/
-
-		//
-
-		///*for (int i = 0; i < 5; i++)
-		//{
-		//	for (int j = 0; j <3; j++)
-		//	{
-		//		cout << old_pop_ptr->ind_ptr << endl;
-		//	}
-		//	
-		//}
-		//*/
 	
 	cout << "END" << endl;
 	fclose(writer);
 	fclose(writeCost);
 	fclose(writeCoverage);
 	fclose(writeSumFacility);
+	fclose(writenumFac);
+	fclose(writeCoordX);
+	fclose(writeCoordY);
 
 	fclose(selectTime);
 	fclose(crossoverTime);
@@ -487,7 +346,11 @@ int main(int, char**)
 	fclose(keepAliveTime);
 	fclose(deleteOldTime);
 	fclose(copyNewGenTime);
-
+	if (Plot)
+	{
+		RPath = string("C:\\\"Program Files\"\\R\\R-3.6.2\\bin\\R.exe < C:\\\"Users\"\\ThinkPad\\Desktop\\Thesis\\Codes\\Visualization_Algorithms\\MIP_Sol1_Sol2_Compare.R --no-save");
+		system(RPath.c_str());
+	}
 	cin >> STOP;
 	return 0;
 

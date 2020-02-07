@@ -34,22 +34,22 @@ void nselect(population* old_pop_ptr, matepopulation* pop2_ptr)
   
   pop2_ptr->ind_ptr= &(pop2_ptr->ind[0]); 
 
-
   for(int n = 0; n<2*popSize; n++)
     {
       /*Select first parent randomly*/
       do
       {
           parent1 = selectParent(old_pop_ptr);
+        
       } while (parent1->numFac > maxlimit_facility || (parent1->numFac <= minlimit_facility));
-
+      
       /*Select second parent randomly*/
       do
       {
           parent2 = selectParent(old_pop_ptr);
 
       } while ((parent2->numFac > maxlimit_facility) || (parent2->numFac <= minlimit_facility));
-         
+      
       old_pop_ptr->ind_ptr = parent1;
       
       fit_ptr1 = &(old_pop_ptr->ind_ptr->rank);
@@ -62,7 +62,7 @@ void nselect(population* old_pop_ptr, matepopulation* pop2_ptr)
       //printf("Rank2:%d--%d\n",parent2->numDC, *fit_ptr2);
       f2_ptr = &(old_pop_ptr->ind_ptr->cub_len);
 /*--------------------------------------------------------------------------*/
- //         HANGI INDIVIDUAL'LARI GÖRMEK İÇİN YAZDIRIYORUM
+ //         HANGI INDIVIDUAL'LARI SEÇTİĞİNİ GÖRMEK İÇİN YAZDIRIYORUM
  /*         printf("Cost:%d-Coverage:%d-NumFac:%d-Rank:%d-Crowding:%f\nCost:%d-Coverage:%d-NumFac:%d-Rank:%d-Crowding:%f\n",
               parent1->fitness[0], parent1->fitness[1], parent1->numFac, parent1->rank, parent1->cub_len,
               parent2->fitness[0], parent2->fitness[1], parent2->numFac, parent2->rank, parent2->cub_len);

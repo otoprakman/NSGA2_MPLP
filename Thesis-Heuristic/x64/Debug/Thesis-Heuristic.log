@@ -1,0 +1,42 @@
+﻿  Algorithm.cpp
+C:\Users\ThinkPad\Desktop\Thesis\Codes\ThesisNSGA-II\Thesis-Heuristic\Parameters.h(35,25): warning C4305: 'initializing': truncation from 'double' to 'float'
+C:\Users\ThinkPad\Desktop\Thesis\Codes\ThesisNSGA-II\Thesis-Heuristic\Algorithm.cpp(6,10): warning C4067: unexpected tokens following preprocessor directive - expected a newline
+C:\Users\ThinkPad\Desktop\Thesis\Codes\ThesisNSGA-II\Thesis-Heuristic\Algorithm.cpp(7,10): warning C4067: unexpected tokens following preprocessor directive - expected a newline
+C:\Users\ThinkPad\Desktop\Thesis\Codes\ThesisNSGA-II\Thesis-Heuristic\Functions.h(46,13): warning C4244: 'return': conversion from 'double' to 'float', possible loss of data
+C:\Users\ThinkPad\Desktop\Thesis\Codes\ThesisNSGA-II\Thesis-Heuristic\Functions.h(204,52): warning C4244: '=': conversion from 'double' to 'float', possible loss of data
+C:\Users\ThinkPad\Desktop\Thesis\Codes\ThesisNSGA-II\Thesis-Heuristic\Functions.h(273,51): warning C4244: '+=': conversion from 'double' to 'float', possible loss of data
+C:\Users\ThinkPad\Desktop\Thesis\Codes\ThesisNSGA-II\Thesis-Heuristic\Functions.h(284,54): warning C4244: '+=': conversion from 'double' to 'float', possible loss of data
+C:\Users\ThinkPad\Desktop\Thesis\Codes\ThesisNSGA-II\Thesis-Heuristic\Functions.h(400,13): warning C4244: '=': conversion from 'int' to 'float', possible loss of data
+C:\Users\ThinkPad\Desktop\Thesis\Codes\ThesisNSGA-II\Thesis-Heuristic\Functions.h(401,13): warning C4244: '=': conversion from 'int' to 'float', possible loss of data
+C:\Users\ThinkPad\Desktop\Thesis\Codes\ThesisNSGA-II\Thesis-Heuristic\Functions.h(397,13): warning C4101: 'm': unreferenced local variable
+C:\Users\ThinkPad\Desktop\Thesis\Codes\ThesisNSGA-II\Thesis-Heuristic\Functions.h(397,16): warning C4101: 'n': unreferenced local variable
+C:\Users\ThinkPad\Desktop\Thesis\Codes\ThesisNSGA-II\Thesis-Heuristic\Functions.h(611,44): warning C4244: '=': conversion from 'int' to 'float', possible loss of data
+C:\Users\ThinkPad\Desktop\Thesis\Codes\ThesisNSGA-II\Thesis-Heuristic\Functions.h(635,62): warning C4244: '=': conversion from 'double' to 'float', possible loss of data
+C:\Users\ThinkPad\Desktop\Thesis\Codes\ThesisNSGA-II\Thesis-Heuristic\Functions.h(640,19): warning C4244: '=': conversion from 'float' to 'int', possible loss of data
+C:\Users\ThinkPad\Desktop\Thesis\Codes\ThesisNSGA-II\Thesis-Heuristic\Functions.h(653,10): warning C4101: 'j1': unreferenced local variable
+C:\Users\ThinkPad\Desktop\Thesis\Codes\ThesisNSGA-II\Thesis-Heuristic\Algorithm.cpp(8,10): warning C4067: unexpected tokens following preprocessor directive - expected a newline
+C:\Users\ThinkPad\Desktop\Thesis\Codes\ThesisNSGA-II\Thesis-Heuristic\select.h(16,15): warning C4244: 'initializing': conversion from 'double' to 'float', possible loss of data
+C:\Users\ThinkPad\Desktop\Thesis\Codes\ThesisNSGA-II\Thesis-Heuristic\select.h(17,15): warning C4244: 'initializing': conversion from 'float' to 'int', possible loss of data
+C:\Users\ThinkPad\Desktop\Thesis\Codes\ThesisNSGA-II\Thesis-Heuristic\Algorithm.cpp(9,10): warning C4067: unexpected tokens following preprocessor directive - expected a newline
+C:\Users\ThinkPad\Desktop\Thesis\Codes\ThesisNSGA-II\Thesis-Heuristic\keepaliven.h(2,10): warning C4067: unexpected tokens following preprocessor directive - expected a newline
+C:\Users\ThinkPad\Desktop\Thesis\Codes\ThesisNSGA-II\Thesis-Heuristic\keepaliven.h(425,51): warning C4244: '=': conversion from 'int' to 'float', possible loss of data
+C:\Users\ThinkPad\Desktop\Thesis\Codes\ThesisNSGA-II\Thesis-Heuristic\keepaliven.h(448,21): warning C4244: '=': conversion from 'float' to 'int', possible loss of data
+C:\Users\ThinkPad\Desktop\Thesis\Codes\ThesisNSGA-II\Thesis-Heuristic\keepaliven.h(476,48): warning C4244: '=': conversion from 'int' to 'float', possible loss of data
+C:\Users\ThinkPad\Desktop\Thesis\Codes\ThesisNSGA-II\Thesis-Heuristic\keepaliven.h(500,65): warning C4244: '=': conversion from 'double' to 'float', possible loss of data
+C:\Users\ThinkPad\Desktop\Thesis\Codes\ThesisNSGA-II\Thesis-Heuristic\keepaliven.h(505,19): warning C4244: '=': conversion from 'float' to 'int', possible loss of data
+C:\Users\ThinkPad\Desktop\Thesis\Codes\ThesisNSGA-II\Thesis-Heuristic\Algorithm.cpp(10,10): warning C4067: unexpected tokens following preprocessor directive - expected a newline
+C:\Users\ThinkPad\Desktop\Thesis\Codes\ThesisNSGA-II\Thesis-Heuristic\Algorithm.cpp(22,12): warning C4244: 'argument': conversion from 'time_t' to 'unsigned int', possible loss of data
+C:\Users\ThinkPad\Desktop\Thesis\Codes\ThesisNSGA-II\Thesis-Heuristic\Algorithm.cpp(96,24): warning C4244: 'argument': conversion from 'clock_t' to 'float', possible loss of data
+C:\Users\ThinkPad\Desktop\Thesis\Codes\ThesisNSGA-II\Thesis-Heuristic\Algorithm.cpp(96,17): warning C4244: 'argument': conversion from 'clock_t' to 'float', possible loss of data
+C:\Users\ThinkPad\Desktop\Thesis\Codes\ThesisNSGA-II\Thesis-Heuristic\Algorithm.cpp(131,24): warning C4244: 'argument': conversion from 'clock_t' to 'float', possible loss of data
+C:\Users\ThinkPad\Desktop\Thesis\Codes\ThesisNSGA-II\Thesis-Heuristic\Algorithm.cpp(131,17): warning C4244: 'argument': conversion from 'clock_t' to 'float', possible loss of data
+C:\Users\ThinkPad\Desktop\Thesis\Codes\ThesisNSGA-II\Thesis-Heuristic\Algorithm.cpp(182,24): warning C4244: 'argument': conversion from 'clock_t' to 'float', possible loss of data
+C:\Users\ThinkPad\Desktop\Thesis\Codes\ThesisNSGA-II\Thesis-Heuristic\Algorithm.cpp(182,17): warning C4244: 'argument': conversion from 'clock_t' to 'float', possible loss of data
+C:\Users\ThinkPad\Desktop\Thesis\Codes\ThesisNSGA-II\Thesis-Heuristic\Algorithm.cpp(214,25): warning C4244: 'argument': conversion from 'clock_t' to 'float', possible loss of data
+C:\Users\ThinkPad\Desktop\Thesis\Codes\ThesisNSGA-II\Thesis-Heuristic\Algorithm.cpp(214,18): warning C4244: 'argument': conversion from 'clock_t' to 'float', possible loss of data
+C:\Users\ThinkPad\Desktop\Thesis\Codes\ThesisNSGA-II\Thesis-Heuristic\Algorithm.cpp(239,25): warning C4244: 'argument': conversion from 'clock_t' to 'float', possible loss of data
+C:\Users\ThinkPad\Desktop\Thesis\Codes\ThesisNSGA-II\Thesis-Heuristic\Algorithm.cpp(239,18): warning C4244: 'argument': conversion from 'clock_t' to 'float', possible loss of data
+C:\Users\ThinkPad\Desktop\Thesis\Codes\ThesisNSGA-II\Thesis-Heuristic\Algorithm.cpp(326,25): warning C4244: 'argument': conversion from 'clock_t' to 'float', possible loss of data
+C:\Users\ThinkPad\Desktop\Thesis\Codes\ThesisNSGA-II\Thesis-Heuristic\Algorithm.cpp(326,18): warning C4244: 'argument': conversion from 'clock_t' to 'float', possible loss of data
+C:\Users\ThinkPad\Desktop\Thesis\Codes\ThesisNSGA-II\Thesis-Heuristic\Functions.h(222): warning C4172: returning address of local variable or temporary: b
+  Thesis-Heuristic.vcxproj -> C:\Users\ThinkPad\Desktop\Thesis\Codes\ThesisNSGA-II\x64\Debug\Thesis-Heuristic.exe

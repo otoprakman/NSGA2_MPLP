@@ -38,7 +38,7 @@ float fparaglob[2*maxpop][2];
 
 void keepalive(population *pop1_ptr,population *pop2_ptr,population *pop3_ptr,int gen)
 {
-  int i,j,k,m,a1,l,rec;
+  int i,j,k,m,l,rec;
   
   int st,pool,poolf,sel;
   
@@ -133,6 +133,7 @@ void keepalive(population *pop1_ptr,population *pop2_ptr,population *pop3_ptr,in
           pop3_ptr->ind[k].numDC = globalpop.ind[i].numDC;
           pop3_ptr->ind[k].numRS = globalpop.ind[i].numRS;
           pop3_ptr->ind[k].numFac = globalpop.ind[i].numFac;
+
           for (j = 0; j < pop3_ptr->ind[k].numFac; j++)
               pop3_ptr->ind[k].facilitySet[j] = globalpop.ind[i].facilitySet[j];
           k++;  // increment the pop3 counter
@@ -514,7 +515,7 @@ void gshare(int rnk)
 void finalsort(int m1)
 {
   float temp,temp1; 
-  int i1,j1,k1;
+  int i1,k1;
   for(k1 = 0;k1 < m1-1;k1++)
     {
       for(i1 = k1+1;i1 < m1;i1++)

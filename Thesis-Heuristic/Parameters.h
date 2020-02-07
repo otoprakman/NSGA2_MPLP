@@ -1,25 +1,30 @@
 #pragma once
+#include <string>
 #define smallest 0.00000001
 
 
 //////******* PARAMETER SETTINGS ********//////
 
+std::string RPath;					// Path of R.exe
+
+const bool Plot = 1;
+
 const int costDC = 4;			//Cost of Opening a new DC
 const int costRS = 1;			//Cost of opening a new RS
 const int numDemand = 600;		//Number of Discrete Demand Points
-const float fd = 1;				//Distance for Coverage Constraint
-const float fp = 2;				//Distance for Connectivity Constraint
+const float fd = 1.0;				//Distance for Coverage Constraint
+const float fp = 2.0;				//Distance for Connectivity Constraint
 const int popSize = 50;			//Number of solutions in the solution space (population of the genetic algorithm)
 const float mu = 0.5;
 const float sigma = 0.5;
 
 
 const float minLoc = 0.0;		//For initial population facilities are randomly placed, 
-const float maxLoc = 10;		//hence x-y coordinate limits are defined
+const float maxLoc = 10.0;		//hence x-y coordinate limits are defined
 
-const int generationNum = 100;		//Total generation
+const int generationNum = 300;		//Total generation
 
-const int  maxfun = 2;				//Number of objectives in the problem (Cost:0 / Coverage:1)
+const int maxfun = 2;				//Number of objectives in the problem (Cost:0 / Coverage:1)
 const int maxpop = popSize;			//Array size that stores the individual number at a rank
 const int max_numFac = 1000;		//max number of facilities in a solution
 const int maxInitFacility = 10;		/*While generating initial population, 
@@ -27,9 +32,11 @@ const int maxInitFacility = 10;		/*While generating initial population,
 									This parameter is for the maximum number of facilities in each population.*/
 const int minInitFacility = 1;		//Minimum number of facilities in initial population
 
+const float cutoff = 0.9;
 
-const int maxlimit_facility = 30;   //Allow maximum number of facilities in the mating pool
-const int minlimit_facility = 1;	//If it is 1, that indicates individuals that has at least 2 or greater number of facilities can be in the matingpool. 
+const int maxlimit_facility = 30;   //Allow maximum number of facilities in the mating pool (including)
+const int minlimit_facility = 1;	/*If it is 1, that indicates individuals that has at least 2 or 
+									greater number of facilities can be in the matingpool. (not including)*/
 
 typedef struct 						//Demand Points
 {
@@ -43,6 +50,13 @@ typedef struct 						//Facility points
 	float CoordX;
 	float CoordY;
 }facility;
+
+typedef struct 						//Facility Set
+{
+	facility facilitySet[max_numFac];
+
+}facilitySet;
+
 
 typedef struct
 {
@@ -69,7 +83,7 @@ typedef struct
 
 typedef struct
 {
-	int maxrank;				 /*Maximum rank present in the population*/
+	int maxrank;				 /*Maximum rank that is present in the population*/
 	int rankno[maxpop];		     /*record of no. of individuals at a particular rank*/
 	individual ind[maxpop*2],
 		* ind_ptr;

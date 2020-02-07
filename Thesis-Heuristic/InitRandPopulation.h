@@ -3,9 +3,6 @@
 #include <vector>
 #include <algorithm>
 #include <random>
-#include "Parameters.h";
-#include "mrand.h";
-
 using namespace std;
 
 float randomLocation(float minLoc, float maxLoc); // Generate random locations
@@ -43,7 +40,7 @@ float randomLocation(float minLoc, float maxLoc) {					//Generate random float n
 	return number = minLoc + static_cast <float> (rand()) / (static_cast <float> (RAND_MAX / (maxLoc - minLoc))); //!!!!Delete int expression!!!!!
 }
 
-int randomNumFacility(int maxFacility,int minInitFacility) {							//Generate random integer numbers for initial facility numbers in Solutions
+int randomNumFacility(int maxFacility,int minInitFacility) {		//Generate random integer numbers for initial facility numbers in Solutions
 	int number = 0;
 
 	return number = minInitFacility + static_cast <int> (rand()) / (static_cast <int> (RAND_MAX / (maxFacility - minInitFacility)));

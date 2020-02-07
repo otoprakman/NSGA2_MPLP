@@ -125,13 +125,13 @@
     </Link>
   </ItemDefinitionGroup>
   <ItemGroup>
-    <ClInclude Include="Classes.h" />
     <ClInclude Include="Functions.h" />
     <ClInclude Include="GetInput.h" />
     <ClInclude Include="InitRandPopulation.h" />
     <ClInclude Include="keepaliven.h" />
     <ClInclude Include="MinimumSpanningTree.h" />
     <ClInclude Include="Parameters.h" />
+    <ClInclude Include="ReadWriteFiles.h" />
     <ClInclude Include="select.h" />
   </ItemGroup>
   <ItemGroup>

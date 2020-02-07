@@ -1,6 +1,4 @@
-﻿#pragma once
-#include "Parameters.h";
-#include "MinimumSpanningTree.h";
+﻿
 
 
 void printExecTime(float start, float stop, FILE* loc);		// Print Execution Time of a function
@@ -54,7 +52,6 @@ void findCoverage(population* pop_ptr) {
 	demand_ptr = &(demandSet);
 
 	int temp_numFac;
-
 	for (int i = 0; i < popSize; i++)
 	{
 		temp_numFac = pop_ptr->ind_ptr->numFac;
@@ -79,6 +76,7 @@ void findCoverage(population* pop_ptr) {
 		
 		pop_ptr->ind_ptr->fitness[1] = coverage;
 		pop_ptr->ind_ptr = &(pop_ptr->ind[i+1]);
+
 	}
 }
 
@@ -150,7 +148,7 @@ facility affine_comb(facility* a, facility* b)
 		c.CoordY = a->CoordY * beta + b->CoordY * (1 - beta);
 		/*if (c.CoordX < 0.0 || c.CoordY < 0.0) printf("(Beta:%f)Minus location Detected X:%f - Y:%f !!\n", beta, c.CoordX, c.CoordY);
 		printf("Beta:%f\n", beta);*/
-	} while (c.CoordX < 0.0 || c.CoordY < 0.0 || c.CoordX>10.0 || c.CoordY>10.0);
+	} while (c.CoordX < minLoc || c.CoordY < minLoc || c.CoordX > maxLoc || c.CoordY > maxLoc);
 
 
 	/*printf("RETURNED X:%f Y:%f\n", c.CoordX, c.CoordY);*/
@@ -158,7 +156,7 @@ facility affine_comb(facility* a, facility* b)
 	return c;
 }
 
-facility* offspring_facility(facility a[], int size)   
+facility* offspring_facility(facilitySet a, int size)   
 {
 	float temp_probSet[max_numFac];
 	int temp_covSet[max_numFac];		//Change size of array, it should be greater than max_numFac (size > max_numFac)
@@ -167,7 +165,7 @@ facility* offspring_facility(facility a[], int size)
 
 	for (int i = 0; i < size; i++)
 	{
-		temp_covSet[i] = findCoverage_facility(a[i]);
+		temp_covSet[i] = findCoverage_facility(a.facilitySet[i]);
 	}
 
 	int min = *std::min_element(temp_covSet, temp_covSet + size);
@@ -184,7 +182,8 @@ facility* offspring_facility(facility a[], int size)
 
 			if (rnd <= temp_probSet[i])
 			{
-				b[k] = a[i];
+				b[k] = a.facilitySet[i];
+
 				//printf("Prob: %f--Selected: %f\n", temp_probSet[j],b[k].CoordX);
 				k += 1;
 			}
@@ -198,6 +197,8 @@ facility* offspring_facility(facility a[], int size)
 	}
 	else
 	{
+		//float rnd = static_cast <float> (rand()) / (static_cast <float> (RAND_MAX));  //ALTERNATIVE; if we generate only one random number instead generating for each facilities
+
 		for (int j = 0; j < size; j++)
 		{
 			temp_probSet[j] = 1.00 * (temp_covSet[j] - min) / (max - min);
@@ -206,11 +207,12 @@ facility* offspring_facility(facility a[], int size)
 			{
 				printf("******\n");
 			}*/
+			
 			float rnd = static_cast <float> (rand()) / (static_cast <float> (RAND_MAX));
 
 			if (rnd <= temp_probSet[j])
 			{
-				b[k] = a[j];
+				b[k] = a.facilitySet[j];
 				//printf("Prob: %f--Selected: %f\n", temp_probSet[j],b[k].CoordX);
 				k += 1;
 			}
@@ -220,20 +222,121 @@ facility* offspring_facility(facility a[], int size)
 	return b;
 }
 
+individual cartesianFilter(individual* a, int size, individual* b, int size2, individual* offspring_fac) {
+	int temp_covSet[max_numFac];
+	int temp_covSet2[max_numFac];
+	int total = 0;
+	int total2 = 0;
+	float cumul = 0.0;
+	float cumul2 = 0.0;
+	facilitySet return_fac;
+	facilitySet return_fac2;
+	facilitySet return_facRES;
+	facility* ptr1;
+	facility* ptr2;
+	int k = 0;
+	int k2 = 0;
+	int m = 0;
+
+	/*for (int i = 0; i < a->numFac; i++)
+	{
+		cout << "A: " << a->facilitySet[i].CoordX << endl;
+
+	}
+	for (int i = 0; i < b->numFac; i++)
+	{
+		cout << "B: " << b->facilitySet[i].CoordX << endl;
+	}*/
+
+
+	for (int i = 0; i < size; i++)
+	{
+		temp_covSet[i] = findCoverage_facility(a->facilitySet[i]);	//find facility coverages of parent 1
+		total += temp_covSet[i];
+	}
+	
+	for (int i = 0; i < size2; i++)
+	{
+		temp_covSet2[i] = findCoverage_facility(b->facilitySet[i]); //find facility coverages of parent 2
+		total2 += temp_covSet2[i];
+	}
+
+	std::sort(std::begin(temp_covSet), std::end(temp_covSet), std::greater<>()); //sort in descending order
+	std::sort(std::begin(temp_covSet2), std::end(temp_covSet2), std::greater<>());
+
+	for (int i = 0; i < size; i++)
+	{
+		if ((cumul - cutoff) < 0.000001 )
+		{
+			return_fac.facilitySet[k] = a->facilitySet[i];
+			k += 1;
+			cumul += (1.0 * temp_covSet[i]) / (1.0 * total);
+		}
+	}
+
+	
+	for (int i = 0; i < size2; i++)
+	{
+		if ((cumul2 - cutoff) < 0.000001)
+		{
+			return_fac2.facilitySet[k2] = b->facilitySet[i];
+			k2 += 1;
+			cumul2 += (1.0 * temp_covSet2[i]) / (1.0 * total2);
+		}
+	}
+	
+	/*for (int i = 0; i < k; i++)
+	{
+		cout << "A+: " << return_fac.facilitySet[i].CoordX << endl;
+	}
+	for (int i = 0; i < k2; i++)
+	{
+		cout << "B+: " << return_fac2.facilitySet[i].CoordX << endl;
+	}*/
+
+
+	for (int i = 0; i < k; i++)
+	{
+		ptr1 = &(return_fac.facilitySet[i]);
+
+		for (int j = 0; j < k2; j++)
+		{
+			ptr2 = &(return_fac2.facilitySet[j]);
+
+			return_facRES.facilitySet[m] = affine_comb(ptr1, ptr2);
+			/*cout << "OFF: " << return_facRES.facilitySet[m].CoordX << endl;*/
+
+			m += 1;
+		}
+	}
+	offspring_fac->facility_ptr = offspring_facility(return_facRES, m);
+
+	for (int i = 0; i <max_numFac; i++) ///////////////////----------WARNING----------///////
+	{
+		offspring_fac->facilitySet[i] = *offspring_fac->facility_ptr;
+		//cout << "OFF+: " << offspring_fac->facilitySet[i].CoordX << endl;
+
+		offspring_fac->facility_ptr++;
+
+	}
+
+	return *offspring_fac;
+
+}
 
 individual combine_ind(individual* a, individual* b, individual* offspring_fac)
 {
-	facility temp_facilitySet[max_numFac];
-	int k = 0;		
-
+	facilitySet temp_facilitySet;
+	int k = 0;	
+	
 	for (int i = 0; i < a->numFac; i++)
 	{
 		a->facility_ptr = &(a->facilitySet[i]);
 
-		for (int j = i; j < b->numFac; j++)
+		for (int j = 0; j < b->numFac; j++)
 		{
 			b->facility_ptr = &(b->facilitySet[j]);
-			temp_facilitySet[k] = affine_comb(a->facility_ptr, b->facility_ptr);
+			temp_facilitySet.facilitySet[k] = affine_comb(a->facility_ptr, b->facility_ptr);
 			//if (temp_facilitySet[k].CoordX < 0.0) break;
 			k += 1;			
 		}
@@ -241,16 +344,15 @@ individual combine_ind(individual* a, individual* b, individual* offspring_fac)
 		//if (temp_facilitySet[k-1].CoordX < 0.0) break;
 	}
 
-	if (k >= 1)
-	{
-		offspring_fac->facility_ptr = offspring_facility(temp_facilitySet, k);
 
-		for (int i = 0; i < max_numFac; i++)
-		{
-			offspring_fac->facilitySet[i] = *offspring_fac->facility_ptr;
-			offspring_fac->facility_ptr ++;
-		}
+	offspring_fac->facility_ptr = offspring_facility(temp_facilitySet, k);
+
+	for (int i = 0; i < max_numFac; i++)
+	{
+		offspring_fac->facilitySet[i] = *offspring_fac->facility_ptr;
+		offspring_fac->facility_ptr ++;
 	}
+
 	//if (k == 1) offspring_fac->facilitySet[0]=temp_facilitySet[0];
 
 	return *offspring_fac;
@@ -258,6 +360,7 @@ individual combine_ind(individual* a, individual* b, individual* offspring_fac)
 
 void crossover(matepopulation* matepop_ptr, population* new_pop_ptr,FILE* writer) 
 {
+
 	int k = 0;
 
 	for (int i = 0; i < 2*popSize; i+=2)
@@ -267,19 +370,24 @@ void crossover(matepopulation* matepop_ptr, population* new_pop_ptr,FILE* writer
 		matepop_ptr->ind_ptr = &(matepop_ptr->ind[i+1]);
 		new_pop_ptr->ind_ptr = &(new_pop_ptr->ind[k]);
 		
-		/* write 10 lines of text into the file stream*/
-//		fprintf(writer, "Parent 1:%d-Parent 2:%d\n", temp_ptr->numFac, matepop_ptr->ind_ptr->numFac);
+		//new_pop_ptr->ind[k] = combine_ind(matepop_ptr->ind_ptr, temp_ptr, new_pop_ptr->ind_ptr);
 
-		new_pop_ptr->ind[k] = combine_ind(matepop_ptr->ind_ptr, temp_ptr, new_pop_ptr->ind_ptr);
+		new_pop_ptr->ind[k] = cartesianFilter(matepop_ptr->ind_ptr, matepop_ptr->ind_ptr->numFac, temp_ptr, temp_ptr->numFac, new_pop_ptr->ind_ptr);
+		
+		//for (int i = 0; i < 10; i++)
+		//{
+		//	cout << "OUT: " << new_pop_ptr->ind[k].facilitySet[i].CoordX << endl;
+		//}
 
 		if (new_pop_ptr->ind[k].facilitySet[0].CoordX<0)
 		{
 			printf("ZERO FACILITY INDEX: %d-- %f\n", k+1, new_pop_ptr->ind[k].facilitySet[0].CoordX);
+			cin >> k;
 		}
-
 
 		k += 1;		
 	}
+
 }
 
 
@@ -463,15 +571,17 @@ void find_numFac(population* pop_ptr) {
 	{
 		pop_ptr->ind_ptr = &(pop_ptr->ind[i]);
 		pop_ptr->ind_ptr->numFac = 0;
-
 		for (int j = 0; j < max_numFac; j++)
 		{
-			if ((pop_ptr->ind_ptr->facilitySet[j].CoordX > 0) | (pop_ptr->ind_ptr->facilitySet[j].CoordY > 0))
+
+			if ((pop_ptr->ind_ptr->facilitySet[j].CoordX > 0.0) && (pop_ptr->ind_ptr->facilitySet[j].CoordY > 0.0))
 			{
 				pop_ptr->ind_ptr->numFac += 1;
+
 			}
 		}
 	}
+	
 }
 
 float fpara1[maxpop][2];		//fitness values of individuals in the same rank
