@@ -209,6 +209,32 @@ int main(int, char**)
 			/*Elitism And Sharing Implemented*/
 			keepalive(old_pop_ptr, new_pop_ptr, last_pop_ptr, generation + 1); 
 			
+
+
+			int	sumFacility2 = 0;
+			int max2 = 0;
+			int min2 = 999999;
+
+			for (int i = 0, j = 0; i < popSize, j < 2 * popSize; i++, j += 2)
+			{
+				sumFacility2 += last_pop_ptr->ind[i].numFac;
+				if (last_pop_ptr->ind[i].numFac > max2)
+				{
+					max2 = last_pop_ptr->ind[i].numFac;
+				}
+				if (last_pop_ptr->ind[i].numFac < min2)
+				{
+					min2 = last_pop_ptr->ind[i].numFac;
+				}
+				//float ratio = ((float)new_pop_ptr->ind[i].numFac) / ((float)mate_pop_ptr->ind[j].numFac * (float)mate_pop_ptr->ind[j + 1].numFac);
+
+				//fprintf(writer, "%f\n", ratio);
+			}
+
+			fprintf(writeSumFacilityAfterSelection, "%d\t %d\t %d\n", sumFacility2, max2, min2);
+
+
+
 			end = clock();
 
 			printExecTime(start, end, keepAliveTime);
@@ -339,6 +365,8 @@ int main(int, char**)
 	fclose(writenumFac);
 	fclose(writeCoordX);
 	fclose(writeCoordY);
+	fclose(writeSumFacilityAfterSelection);
+
 
 	fclose(selectTime);
 	fclose(crossoverTime);

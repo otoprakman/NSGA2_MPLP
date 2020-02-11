@@ -13,7 +13,8 @@ FILE
 * writeSumFacility,
 * writeCoordX,
 * writeCoordY,
-* writenumFac;
+* writenumFac,
+* writeSumFacilityAfterSelection;
 
 FILE
 * selectTime,
@@ -33,6 +34,7 @@ void readWrite()
 	writeCoordX = fopen("CoordX.txt", "w");
 	writeCoordY = fopen("CoordY.txt", "w");
 	writenumFac = fopen("numFac.txt", "w");
+	writeSumFacilityAfterSelection = fopen("writeSumFacilityAfterSelection.txt", "w");
 
 	selectTime = fopen("selectTime.txt", "w");
 	crossoverTime = fopen("crossoverTime.txt", "w");

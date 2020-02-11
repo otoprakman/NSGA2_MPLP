@@ -22,19 +22,19 @@ const float sigma = 0.5;
 const float minLoc = 0.0;		//For initial population facilities are randomly placed, 
 const float maxLoc = 10.0;		//hence x-y coordinate limits are defined
 
-const int generationNum = 300;		//Total generation
+const int generationNum = 200;		//Total generation
 
 const int maxfun = 2;				//Number of objectives in the problem (Cost:0 / Coverage:1)
 const int maxpop = popSize;			//Array size that stores the individual number at a rank
-const int max_numFac = 1000;		//max number of facilities in a solution
-const int maxInitFacility = 10;		/*While generating initial population, 
+const int max_numFac = 5000;		//max number of facilities in a solution
+const int maxInitFacility = 50;		/*While generating initial population, 
 									number of facilities in each solution is randomly determined.
 									This parameter is for the maximum number of facilities in each population.*/
-const int minInitFacility = 1;		//Minimum number of facilities in initial population
+const int minInitFacility = 10;		//Minimum number of facilities in initial population
 
-const float cutoff = 0.9;
+const float cutoff = 0.6;
 
-const int maxlimit_facility = 30;   //Allow maximum number of facilities in the mating pool (including)
+const int maxlimit_facility = 70;   //Allow maximum number of facilities in the mating pool (including)
 const int minlimit_facility = 1;	/*If it is 1, that indicates individuals that has at least 2 or 
 									greater number of facilities can be in the matingpool. (not including)*/
 
@@ -49,6 +49,7 @@ typedef struct 						//Facility points
 {
 	float CoordX;
 	float CoordY;
+	int facCov;
 }facility;
 
 typedef struct 						//Facility Set
@@ -88,7 +89,6 @@ typedef struct
 	individual ind[maxpop*2],
 		* ind_ptr;
 }matepopulation;
-
 
 population oldpop,
 newpop,

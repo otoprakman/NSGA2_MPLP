@@ -430,7 +430,7 @@ void gsort(int rnk,int sel)
     {
       for(j = i+1;j < q;j++)
 	{
-	  if(array[i][1] > array[j][1]) //Orjinal kodda "<" işareti var ancak bu modelde ">" uygun oluyor???
+	  if(array[i][1] < array[j][1]) //Orjinal kodda "<" işareti var ancak bu modelde ">" uygun oluyor???
 	    {
 	      temp = array[i][1];
 	      temp1 = array[i][0];
