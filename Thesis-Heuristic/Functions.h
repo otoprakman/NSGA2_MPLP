@@ -209,6 +209,8 @@ facility* myopic_offspring_facility(facilitySet a, int size) {
 		{
 			min = a.facilitySet[i].facCov;
 		}
+		//printf("Fac.Cov:%d\n", a.facilitySet[i].facCov);
+
 	}
 
 	//printf("Max:%d Min:%d\n", max, min);
@@ -247,7 +249,7 @@ facility* myopic_offspring_facility(facilitySet a, int size) {
 			if (rnd <= temp_probSet[j])
 			{
 				b[k] = a.facilitySet[j];
-				//printf("Prob: %f--Selected: %f\n", temp_probSet[j],b[k].CoordX);
+				//printf("Prob: %f--Random: %f--Cov: %d\n", temp_probSet[j],rnd,b[k].facCov);
 				k += 1;
 			}
 		}

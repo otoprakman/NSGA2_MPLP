@@ -268,7 +268,7 @@ int main(int, char**)
 			
 			//Print Last Generation Solutions
 
-			if (generation==generationNum-1)
+			if (generation>=generationNum-2)
 			{
 				for (int i = 0; i < popSize; i++)
 				{
@@ -290,7 +290,7 @@ int main(int, char**)
 					}
 
 				} //Ranksize'ı sürekli üzerine yazdığım için hatalı gözüken sonuçlar verebilir. Kümülatif toplamları popSize'a eşit olana kadar doğru veriyor.
-
+				printf("******************************************\n");
 			}
 
 		//	/*==================================================================*/
