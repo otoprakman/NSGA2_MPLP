@@ -34,21 +34,24 @@ void nselect(population* old_pop_ptr, matepopulation* pop2_ptr)
   
   pop2_ptr->ind_ptr= &(pop2_ptr->ind[0]); 
 
-  for(int n = 0; n<2*popSize; n++)
+  for(int n = 0; n < 2*popSize; n++)
     {
       /*Select first parent randomly*/
       do
       {
           parent1 = selectParent(old_pop_ptr);
-        
-      } while (parent1->numFac > maxlimit_facility || (parent1->numFac <= minlimit_facility));
+          //cout << "Parent-1: " << parent1->numFac << endl;
+
+      } while (parent1->numFac <= minlimit_facility);
       
       /*Select second parent randomly*/
       do
       {
-          parent2 = selectParent(old_pop_ptr);
 
-      } while ((parent2->numFac > maxlimit_facility) || (parent2->numFac <= minlimit_facility));
+          parent2 = selectParent(old_pop_ptr);
+          //cout << "Parent-2: " << parent2->numFac << endl;
+
+      } while (parent2->numFac <= minlimit_facility);
       
       old_pop_ptr->ind_ptr = parent1;
       
@@ -80,11 +83,15 @@ void nselect(population* old_pop_ptr, matepopulation* pop2_ptr)
 	            else pop2_ptr->ind[n] = *parent1;
 	        }
 	     } //end if
+      //cout << "Selected Parent: "<< pop2_ptr->ind[n].numFac << endl;
  /*     printf("(Selected)Cost:%d-Coverage:%d-NumFac:%d,Crowding:%f\n",
           pop2_ptr->ind[n].fitness[0], pop2_ptr->ind[n].fitness[1], pop2_ptr->ind[n].numFac, pop2_ptr->ind[n].cub_len);*/
     }//end for
- 
-  return;
+
+  old_pop_ptr->ind_ptr = &(old_pop_ptr->ind[0]);
+
+  pop2_ptr->ind_ptr = &(pop2_ptr->ind[0]);
+
 }
 
 

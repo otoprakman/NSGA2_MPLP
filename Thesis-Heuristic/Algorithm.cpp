@@ -1,7 +1,8 @@
 ﻿#include <time.h>
 #include <ctime> 
 #include <math.h>
-#include "MinimumSpanningTree.h"
+#include "KruskalMST.h"
+#include "PrimsMST.h"
 #include "InitRandPopulation.h"
 #include "Parameters.h";
 #include "Functions.h";
@@ -15,6 +16,7 @@ using namespace std;
 int main(int, char**)
 {
 	int STOP;
+
 	old_pop_ptr = &(oldpop);
 	new_pop_ptr = &(newpop);
 	mate_pop_ptr = &(matepop);
@@ -30,9 +32,9 @@ int main(int, char**)
 	
 	old_pop_ptr = &(oldpop);
 	findCoverage(old_pop_ptr);			//Find coverage objective
-	
+
 	old_pop_ptr = &(oldpop);
-	find_numDC(old_pop_ptr);			//Find cost objective
+	find_numDCP(old_pop_ptr);			//Find cost objective
 
 	for (int j = 0; j < popSize; j++)
 	{
@@ -55,17 +57,16 @@ int main(int, char**)
 		printf("%d- RS:%d - DC:%d - FAC:%d - Cost:%d - Cov:%d - Rank:%d - %d.RankSize:%d\n", i + 1, old_pop_ptr->ind[i].numRS, old_pop_ptr->ind[i].numDC,
 			old_pop_ptr->ind[i].numFac, old_pop_ptr->ind[i].fitness[0], old_pop_ptr->ind[i].fitness[1], old_pop_ptr->ind[i].rank,
 			i + 1, old_pop_ptr->rankno[i]);
-	}*/
-	printf("Maximum Rank in Initial Population:%d\n", old_pop_ptr->maxrank);
+
+	}
+	printf("Maximum Rank in Initial Population:%d\n", old_pop_ptr->maxrank);*/
 
 	int maxrank1;
 
-	/*for (int i = 0; i < maxpop; i++)
-	{
-		printf("%d-Crowding distances: %f\n", i+1, old_pop_ptr->ind[i].cub_len);
-
-	}*/
-
+	//for (int i = 0; i < maxpop; i++)
+	//{
+	//	printf("%d-Crowding distances: %f\n", i+1, old_pop_ptr->ind[i].cub_len);
+	//}
 																					//********** NOTLAR *********//
 	 /********************************************************************/			
     /*----------------------GENERATION STARTS HERE----------------------*/			
@@ -79,17 +80,24 @@ int main(int, char**)
 
 		start = clock();
 		
+		counter += 1;
+
 		//for (int i = 0; i < popSize; i++)
 		//{
 		//	printf("%d\n", old_pop_ptr->ind[i].numFac);
 		//}
+
 		/*--------SELECT----------------*/
+		
 		nselect(old_pop_ptr, mate_pop_ptr);
+
+
 		//printf("******************\n");
 		//for (int i = 0; i < 2*popSize; i++)
 		//{
 		//	printf("%d\n", mate_pop_ptr->ind[i].numFac);
 		//}
+
 
 		end = clock();
 
@@ -129,28 +137,22 @@ int main(int, char**)
 		end = clock();
 
 		printExecTime(start, end, crossoverTime);
-
 	
 
 
-		///////DELETE
+		/////// LOOK FOR AN ALTERNATIVE INITIALIZATION !!!!
 		for (int i = 0; i < popSize; i++)
 		{
-			for (int j = 0; j < max_numFac; j++)
-			{
-
-				mate_pop_ptr->ind[i].facilitySet[j].CoordX = 0.0;
-				mate_pop_ptr->ind[i].facilitySet[j].CoordY = 0.0;
-			}
+			mate_pop_ptr->ind[i].facilitySet.clear();
 		}
 
-		
 		new_pop_ptr = &(newpop);
 		find_numFac(new_pop_ptr);
 
 		int	sumFacility=0;
 		int max = 0;
 		int min = 999999;
+
 		for (int i=0, j= 0; i < popSize, j < 2*popSize; i++, j+=2)
 		{
 			sumFacility += new_pop_ptr->ind[i].numFac;
@@ -169,13 +171,13 @@ int main(int, char**)
 
 		fprintf(writeSumFacility, "%d\t %d\t %d\n", sumFacility, max, min);
 
-		new_pop_ptr = &(newpop);
-		findCoverage(new_pop_ptr);			//Find coverage objective
-
 		start = clock();
 
 		new_pop_ptr = &(newpop);
-		find_numDC(new_pop_ptr);			//Find cost objective
+		findCoverage(new_pop_ptr);			//Find coverage objective
+
+		new_pop_ptr = &(newpop);
+		find_numDCP(new_pop_ptr);			//Find cost objective
 
 		end = clock();
 
@@ -206,10 +208,11 @@ int main(int, char**)
 			}*/
 
 			start = clock();
+
+			
 			/*Elitism And Sharing Implemented*/
 			keepalive(old_pop_ptr, new_pop_ptr, last_pop_ptr, generation + 1); 
 			
-
 
 			int	sumFacility2 = 0;
 			int max2 = 0;
@@ -233,32 +236,22 @@ int main(int, char**)
 
 			fprintf(writeSumFacilityAfterSelection, "%d\t %d\t %d\n", sumFacility2, max2, min2);
 
-
-
 			end = clock();
 
 			printExecTime(start, end, keepAliveTime);
 
 			start = clock();
 
-			///////DELETE
+			/////// LOOK FOR AN ALTERNATIVE INITIALIZATION !!!!
 			for (int i = 0; i < popSize; i++)
 			{
-				for (int j = 0; j < max_numFac; j++)
-				{
-					old_pop_ptr->ind[i].facilitySet[j].CoordX = 0.0;
-					old_pop_ptr->ind[i].facilitySet[j].CoordY = 0.0;
-				}
+				old_pop_ptr->ind[i].facilitySet.clear();				
 			}
-
-			///////DELETE
+			
+			/////// LOOK FOR AN ALTERNATIVE INITIALIZATION !!!!
 			for (int i = 0; i < popSize; i++)
 			{
-				for (int j = 0; j < max_numFac; j++)
-				{
-					new_pop_ptr->ind[i].facilitySet[j].CoordX = 0.0;
-					new_pop_ptr->ind[i].facilitySet[j].CoordY = 0.0;
-				}
+				new_pop_ptr->ind[i].facilitySet.clear();				
 			}
 			end = clock();
 
@@ -268,19 +261,22 @@ int main(int, char**)
 			
 			//Print Last Generation Solutions
 
-			if (generation>=generationNum-2)
+			if (generation>=generationNum-1)
 			{
+				int count = 0;
 				for (int i = 0; i < popSize; i++)
 				{
 					if (last_pop_ptr->ind[i].rank==1)
 					{
-						printf("%d-(LAST) RS:%d - DC:%d - FAC:%d - Cost:%d - Cov:%d - Rank:%d- %d.RankSize:%d\n", i + 1, last_pop_ptr->ind[i].numRS, last_pop_ptr->ind[i].numDC,
+						count += 1;
+						printf("%d-(LAST) RS:%d - DC:%d - FAC:%d - Cost:%d - Cov:%d - Rank:%d- %d.RankSize:%d\n", count, last_pop_ptr->ind[i].numRS, last_pop_ptr->ind[i].numDC,
 							last_pop_ptr->ind[i].numFac, last_pop_ptr->ind[i].fitness[0], last_pop_ptr->ind[i].fitness[1], last_pop_ptr->ind[i].rank,
 							i + 1, last_pop_ptr->rankno[i]);
-						fprintf(writeCost, "%d\n", -1*last_pop_ptr->ind[i].fitness[0]);
+
+						fprintf(writeCost, "%d\n", -1 * last_pop_ptr->ind[i].fitness[0]);
 						fprintf(writeCoverage, "%d\n", last_pop_ptr->ind[i].fitness[1]);
 						fprintf(writenumFac, "%d\n", last_pop_ptr->ind[i].numFac);
-						
+
 						for (int j = 0; j < last_pop_ptr->ind[i].numFac; j++)
 						{
 							fprintf(writeCoordX, "%f\n", last_pop_ptr->ind[i].facilitySet[j].CoordX);
@@ -309,8 +305,7 @@ int main(int, char**)
 			
 				/*Copy faciltySet for each individual*/
 
-				for (int l = 0; l < last_pop_ptr->ind[j].numFac; l++)
-					old_pop_ptr->ind_ptr->facilitySet[l] = last_pop_ptr->ind_ptr->facilitySet[l];
+				old_pop_ptr->ind_ptr->facilitySet = last_pop_ptr->ind_ptr->facilitySet;
 
 				old_pop_ptr->ind_ptr->numDC = last_pop_ptr->ind_ptr->numDC;
 
@@ -337,14 +332,11 @@ int main(int, char**)
 			maxrank1 = last_pop_ptr->maxrank;
 
 
-			///////DELETE
+			/////// LOOK FOR AN ALTERNATIVE INITIALIZATION !!!!
 			for (int i = 0; i < popSize; i++)
 			{
-				for (int j = 0; j < max_numFac; j++)
-				{
-					last_pop_ptr->ind[i].facilitySet[j].CoordX = 0.0;
-					last_pop_ptr->ind[i].facilitySet[j].CoordY = 0.0;
-				}
+				last_pop_ptr->ind[i].facilitySet.clear();
+				last_pop_ptr->ind[i].facilitySet.clear();				
 			}
 
 			end = clock();
@@ -376,7 +368,7 @@ int main(int, char**)
 	fclose(copyNewGenTime);
 	if (Plot)
 	{
-		RPath = string("C:\\\"Program Files\"\\R\\R-3.6.2\\bin\\R.exe < C:\\\"Users\"\\ThinkPad\\Desktop\\Thesis\\Codes\\Visualization_Algorithms\\MIP_Sol1_Sol2_Compare.R --no-save");
+		RPath = string("C:\\\"Program Files\"\\R\\R-3.6.2\\bin\\R.exe < C:\\\"Users\"\\ThinkPad\\Desktop\\Thesis\\Codes\\Visualization_Algorithms\\Visualization_Algorithms\\Cluster\\MIP_Sol1_Sol2_Compare.R --no-save");
 		system(RPath.c_str());
 	}
 	cin >> STOP;

@@ -51,6 +51,7 @@ void keepalive(population *pop1_ptr,population *pop2_ptr,population *pop3_ptr,in
           globalpop.ind[i].fitness[l] = pop1_ptr->ind[i].fitness[l];
           globalpop.ind[i + popSize].fitness[l] = pop2_ptr->ind[i].fitness[l];
       }
+
       globalpop.ind[i].numDC = pop1_ptr->ind[i].numDC;
       globalpop.ind[i+popSize].numDC = pop2_ptr->ind[i].numDC;
 
@@ -59,11 +60,11 @@ void keepalive(population *pop1_ptr,population *pop2_ptr,population *pop3_ptr,in
 
       globalpop.ind[i].numFac = pop1_ptr->ind[i].numFac;
       globalpop.ind[i + popSize].numFac = pop2_ptr->ind[i].numFac;
-      for (int z = 0; z < max_numFac; z++)
-      {
-          globalpop.ind[i].facilitySet[z] = pop1_ptr->ind[i].facilitySet[z];
-          globalpop.ind[i+popSize].facilitySet[z] = pop2_ptr->ind[i].facilitySet[z];
-      }
+
+      globalpop.ind[i].facilitySet = pop1_ptr->ind[i].facilitySet;
+   
+	  globalpop.ind[i + popSize].facilitySet = pop2_ptr->ind[i].facilitySet;
+
       /*Initialising the dummyfitness to zero */
       globalpop.ind[i].cub_len = 0;
       globalpop.ind[i + popSize].cub_len = 0;
@@ -134,8 +135,7 @@ void keepalive(population *pop1_ptr,population *pop2_ptr,population *pop3_ptr,in
           pop3_ptr->ind[k].numRS = globalpop.ind[i].numRS;
           pop3_ptr->ind[k].numFac = globalpop.ind[i].numFac;
 
-          for (j = 0; j < pop3_ptr->ind[k].numFac; j++)
-              pop3_ptr->ind[k].facilitySet[j] = globalpop.ind[i].facilitySet[j];
+          pop3_ptr->ind[k].facilitySet = globalpop.ind[i].facilitySet;
           k++;  // increment the pop3 counter
       }
   }

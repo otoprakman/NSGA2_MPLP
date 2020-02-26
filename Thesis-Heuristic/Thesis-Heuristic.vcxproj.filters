@@ -15,13 +15,7 @@
     </Filter>
   </ItemGroup>
   <ItemGroup>
-    <ClInclude Include="GetInput.h">
-      <Filter>Header Files</Filter>
-    </ClInclude>
     <ClInclude Include="InitRandPopulation.h">
-      <Filter>Header Files</Filter>
-    </ClInclude>
-    <ClInclude Include="MinimumSpanningTree.h">
       <Filter>Header Files</Filter>
     </ClInclude>
     <ClInclude Include="Parameters.h">
@@ -37,6 +31,12 @@
       <Filter>Header Files</Filter>
     </ClInclude>
     <ClInclude Include="ReadWriteFiles.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="GetInput.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="PrimsMST.h">
       <Filter>Header Files</Filter>
     </ClInclude>
   </ItemGroup>

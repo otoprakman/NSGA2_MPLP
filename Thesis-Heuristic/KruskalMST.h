@@ -67,7 +67,7 @@ void Graph::kruskal_algorithm() {
 	 int DC=1;
 	 for (int i = 0; i < T.size(); i++) 
 	 {
-		 if (T[i].first>fp)
+		 if (T[i].first > fp)
 		 {
 			 DC++;
 		 }
