@@ -1,18 +1,20 @@
 ﻿#include "Parameters.h";
 
+std::random_device dev;
+std::mt19937 rng(dev());
+std::uniform_real_distribution<> dist(0.0, 1.0);
 
-
-void printExecTime(float start, float stop, FILE* loc);		// Print Execution Time of a function
+float ExecTime(float start, float stop);		// Print Execution Time of a function
 
 float findDistance(float a1, float a2, float b1, float b2); // Find Eucledean Distances
 
 void findCoverage(population* pop_ptr);						// Find Coverage of a Facility
 
-void find_numDC(population* pop_ptr);						// Find number of DC-RS and Cost value
+individual find_numDCP(individual ind, int i, bool mutate);						// Find number of DC-RS and Cost value
 
 int findCoverage_facility(facility a);						// Find coverage of a single facility using in crossover
 
-facility affine_comb(facility* a, facility* b);				// Affine Combination of two facilities- generate only one facility
+facility affine_comb(facility a, facility b);				// Affine Combination of two facilities- generate only one facility
 
 std::vector<facility>myopic_facility_selection(std::vector<facility> a, int size); // Create offspring using cartesian product of two individuals
 
@@ -20,9 +22,9 @@ std::vector<facility>adaptive_myopic_facility_selection(std::vector<facility> a,
 
 bool compare(facility a, facility b); 
 
-individual combine_ind(individual* a, individual* b, individual* offspring_fac); // Generate new offspring from two individuals
+individual combine_ind(individual* a, individual* b, individual offspring_fac); // Generate new offspring from two individuals
 
-void crossover(matepopulation* pop_ptr, population* new_pop_ptr, FILE* writer); // Create new population from matepopulation
+void crossover(matepopulation* pop_ptr, population* new_pop_ptr); // Create new population from matepopulation
 
 int indcmp(int* ptr1, int* ptr2);							/*Routine comparing the two individuals in terms of cost and coverage objectives*/
 
@@ -34,15 +36,21 @@ void findCrowding(population* pop_ptr, int rnk);			//Find crowding distances aft
 
 void sort(int numInd);										/*Sort the arrays in ascending order of the fitness*/
 
+void M1_mutation(individual* ind_ptr);
+
+void M2_mutation(individual ind, int i);
+
+void move_points(facility a, facility b, float distance);
+
 //##########################################################################
 //#########################  FUNCTIONS  #################################//
 //##########################################################################
 
 
-void printExecTime(float start, float stop, FILE* loc)
+float ExecTime(float start, float stop)
 {
 	float time_taken = float(stop - start) / float(CLOCKS_PER_SEC);
-	fprintf(loc, "%f\n", time_taken);
+	return time_taken;
 }
 
 
@@ -59,7 +67,7 @@ void findCoverage(population* pop_ptr) {
 
 	for (int i = 0; i < popSize; i++)
 	{
-		temp_numFac = pop_ptr->ind_ptr->numFac;
+		temp_numFac = pop_ptr->ind_ptr->facilitySet.size();
 		int coverage = 0;
 
 		for (int j = 0; j < numDemand; j++)
@@ -121,56 +129,75 @@ void findCoverage(population* pop_ptr) {
 //}
 
 
-void find_numDCP(population* pop_ptr) {
-
-
-	for (int i = 0; i < popSize; i++)
+individual find_numDCP(individual ind, int i, bool mutate) {
+	
+	starting = clock();
+	int temp_numFac = ind.facilitySet.size();
+	if (temp_numFac > 1)
 	{
-		pop_ptr->ind_ptr = &(pop_ptr->ind[i]);
-		int temp_numFac = pop_ptr->ind_ptr->numFac;
-		if (temp_numFac > 1)
+
+		struct PGraph* graph = createGraph(temp_numFac);
+
+		for (int j = 0; j < temp_numFac; j++)
 		{
+			facility* temp_facility = &(ind.facilitySet[j]);
 
-			struct PGraph* graph = createGraph(temp_numFac);
-		
-			for (int j = 0; j < temp_numFac; j++)
+			for (int k = j; k < temp_numFac; k++)
 			{
-				facility* temp_facility = &(pop_ptr->ind_ptr->facilitySet[j]);
-
-				for (int k = j; k < temp_numFac; k++)
+				if (j != k)
 				{
-					if (j!=k)
-					{
-						addEdge(graph, j, k, findDistance(
-							temp_facility->CoordX,
-							temp_facility->CoordY,
-							pop_ptr->ind_ptr->facilitySet[k].CoordX,
-							pop_ptr->ind_ptr->facilitySet[k].CoordY));
-						/*cout << "Distance btw " << j << "-" << k << findDistance(
-							temp_facility->CoordX,
-							temp_facility->CoordY,
-							pop_ptr->ind_ptr->facilitySet[k].CoordX,
-							pop_ptr->ind_ptr->facilitySet[k].CoordY) << endl;*/
-					}
+					addEdge(graph, j, k, findDistance(
+						temp_facility->CoordX,
+						temp_facility->CoordY,
+						ind.facilitySet[k].CoordX,
+						ind.facilitySet[k].CoordY));
+					/*cout << "Distance btw " << j << "-" << k << findDistance(
+						temp_facility->CoordX,
+						temp_facility->CoordY,
+						pop_ptr->ind_ptr->facilitySet[k].CoordX,
+						pop_ptr->ind_ptr->facilitySet[k].CoordY) << endl;*/
+					/*std::cout << j << ". X: " << temp_facility->CoordX << "-- Y: " << temp_facility->CoordY << std::endl;
+					std::cout << k << ". X: " << ind.facilitySet[k].CoordX << "-- Y: " << ind.facilitySet[k].CoordY << std::endl;
+					std::cout << findDistance(
+						temp_facility->CoordX,
+						temp_facility->CoordY,
+						ind.facilitySet[k].CoordX,
+						ind.facilitySet[k].CoordY) << std::endl;*/
 				}
-				
 			}
 
-			pop_ptr->ind_ptr->numDC = PrimMST(graph);
-			pop_ptr->ind_ptr->numRS = pop_ptr->ind_ptr->numFac - pop_ptr->ind_ptr->numDC;
-			pop_ptr->ind_ptr->fitness[0] = (pop_ptr->ind_ptr->numRS) * costRS + (pop_ptr->ind_ptr->numDC) * costDC;
 		}
+
+		ind.numDC = PrimMST(graph, i);
+		if (mutate == 0)
+		{
+			ind.numRS = ind.facilitySet.size() - ind.numDC;
+			ind.fitness[0] = (ind.numRS) * costRS + (ind.numDC) * costDC;
+
+		}	
 		else
 		{
-			pop_ptr->ind_ptr->numDC = 1;
-			pop_ptr->ind_ptr->numRS = 0;
-			pop_ptr->ind_ptr->fitness[0] = (pop_ptr->ind_ptr->numRS) * costRS + (pop_ptr->ind_ptr->numDC) * costDC;
+			move_points(ind.facilitySet[mutated_indices[0]], ind.facilitySet[mutated_indices[1]], mutated_distance);
 
 		}
-
+	}
+	else
+	{
+		if (mutate == 0)
+		{
+			eadj[i] = 0;
+			ind.numDC = 1;
+			ind.numRS = 0;
+			ind.fitness[0] = (ind.numRS) * costRS + (ind.numDC) * costDC;
+		}
 	}
 
-	pop_ptr->ind_ptr = &(pop_ptr->ind[0]);
+	//std::cout << i << ". SOL: " << ind.fitness[0] << std::endl;
+
+	ending = clock();
+
+	msttime += ExecTime(starting, ending);
+	return ind;
 }
 
 int findCoverage_facility(facility a)
@@ -188,6 +215,22 @@ int findCoverage_facility(facility a)
 		}
 	}
 	return coverage;
+}
+
+void move_points(facility a, facility b, float distance)
+{
+	float vec_x;
+	float vec_y;
+	vec_x = a.CoordX - b.CoordX;
+	vec_y = a.CoordY - b.CoordY;
+
+	vec_x /= sqrt(pow(vec_x, 2) + pow(vec_y, 2) * 1.0);
+	vec_y /= sqrt(pow(vec_x, 2) + pow(vec_y, 2) * 1.0);
+	
+	a.CoordX = a.CoordX - (fp - distance) * vec_x;
+	a.CoordY = a.CoordY - (fp - distance) * vec_y;
+	b.CoordX = b.CoordX + (fp - distance) * vec_x;
+	b.CoordY = b.CoordY + (fp - distance) * vec_y;
 }
 
 facility affine_comb(facility a, facility b) 
@@ -218,9 +261,11 @@ std::vector<facility>adaptive_myopic_facility_selection(std::vector<facility> a,
 	int max = 0;
 	int min = 999999999;
 
-	std::vector<float> temp_probSet;
+	float temp_prob;
 	
 	std::vector<facility> b;
+	
+	starting = clock();
 
 	int k = 0;
 	for (int i = 0; i < size; i++)
@@ -234,9 +279,9 @@ std::vector<facility>adaptive_myopic_facility_selection(std::vector<facility> a,
 	for (int i = 0; i < size; i++)
 	{
 		//cout << i << ".Facility Cov: " << a.facilitySet[i].facCov << endl;
-		a[i].facCov = 0;
+		a[i].nfacCov = 0;
 	}
-
+	
 	for (int i = 0; i < numDemand; i++)
 	{
 		for (int j = 0; j < size; j++)
@@ -246,22 +291,25 @@ std::vector<facility>adaptive_myopic_facility_selection(std::vector<facility> a,
 				a[j].CoordX,
 				a[j].CoordY) <= fd)
 			{
-				a[j].facCov += 1;
+				a[j].nfacCov += 1;
 				break;
 			}
 		}
 	}
+	
+	ending = clock();
+	sortingtime += ExecTime(starting, ending);
 
 	for (int i = 0; i < size; i++)
 	{
 		//cout << i << ".Facility Cov: " << a.facilitySet[i].facCov << endl;
-		if (max < a[i].facCov)
+		if (max < a[i].nfacCov)
 		{
-			max = a[i].facCov;
+			max = a[i].nfacCov;
 		}
-		if (min > a[i].facCov)
+		if (min > a[i].nfacCov)
 		{
-			min = a[i].facCov;
+			min = a[i].nfacCov;
 		}
 		//printf("Fac.Cov:%d\n", a.facilitySet[i].facCov);
 
@@ -270,27 +318,33 @@ std::vector<facility>adaptive_myopic_facility_selection(std::vector<facility> a,
 	//printf("Max:%d Min:%d\n", max, min);
 	double adaptdiv=0.0;
 	
-	adaptdiv = (double)1.0 - (double)exp((double)-5* (double)counter/(double)generationNum);
+	if (dynamic==1)
+	{
+		adaptdiv = (double)counter / (double)generationNum;
+	}
+	else
+	{
+		adaptdiv = mean_facility / (float)maxInitFacility;
+	}
 	
+
 	//cout << "Adaptdiv:"<<adaptdiv << endl;
 	
-	std::random_device dev;
-	std::mt19937 rng(dev());
-	std::uniform_real_distribution<> dist(0.0, 1.0);
+
 
 	if (max == min)
 	{
 		for (int i = 0; i < size; i++)
 		{
-			temp_probSet.push_back(1.0);
+			temp_prob = 1.0;
 
 			float rnd = dist(rng);
 
-			if ((rnd*adaptdiv) <= temp_probSet[i])
+			if ((rnd*adaptdiv) <= temp_prob)
 			{
 				b.push_back(a[i]);
-
 			}
+
 			//printf("Prob: %f\n", temp_probSet[i]);
 			//if (i == size - 1)
 			//{
@@ -303,11 +357,11 @@ std::vector<facility>adaptive_myopic_facility_selection(std::vector<facility> a,
 	{
 		for (int j = 0; j < size; j++)
 		{
-			temp_probSet.push_back(1.00 * (a[j].facCov - min) / (max - min));
+			temp_prob = 1.00 * (a[j].nfacCov - min) / (float)(max - min);
 
 			float rnd = dist(rng);
 
-			if ((rnd*adaptdiv) <= temp_probSet[j])
+			if ((rnd*adaptdiv) <= temp_prob)
 			//if(rnd<=temp_probSet[j])
 			{
 				b.push_back(a[j]);
@@ -315,6 +369,7 @@ std::vector<facility>adaptive_myopic_facility_selection(std::vector<facility> a,
 			}
 		}
 	}
+
 	return b;
 }
 
@@ -324,7 +379,7 @@ std::vector<facility>myopic_facility_selection(std::vector<facility> a, int size
 	int max = 0;
 	int min = 999999999;
 
-	std::vector<float> temp_probSet;
+	float temp_prob;
 
 	std::vector<facility> b;
 
@@ -335,12 +390,15 @@ std::vector<facility>myopic_facility_selection(std::vector<facility> a, int size
 		//cout << i << ".Facility Cov: " << a.facilitySet[i].facCov << endl;
 	}
 
+	starting = clock();
 	sort(a.begin(), a.end(), compare);		//Sort in descending order of facility coverages
+	ending = clock();
+	sortingtime += ExecTime(starting, ending);
 
 	for (int i = 0; i < size; i++)
 	{
 		//cout << i << ".Facility Cov: " << a.facilitySet[i].facCov << endl;
-		a[i].facCov = 0;
+		a[i].nfacCov = 0;
 	}
 
 	for (int i = 0; i < numDemand; i++)
@@ -352,7 +410,7 @@ std::vector<facility>myopic_facility_selection(std::vector<facility> a, int size
 				a[j].CoordX,
 				a[j].CoordY) <= fd)
 			{
-				a[j].facCov += 1;
+				a[j].nfacCov += 1;
 				break;
 			}
 		}
@@ -361,13 +419,13 @@ std::vector<facility>myopic_facility_selection(std::vector<facility> a, int size
 	for (int i = 0; i < size; i++)
 	{
 		//cout << i << ".Facility Cov: " << a.facilitySet[i].facCov << endl;
-		if (max < a[i].facCov)
+		if (max < a[i].nfacCov)
 		{
-			max = a[i].facCov;
+			max = a[i].nfacCov;
 		}
-		if (min > a[i].facCov)
+		if (min > a[i].nfacCov)
 		{
-			min = a[i].facCov;
+			min = a[i].nfacCov;
 		}
 		//printf("Fac.Cov:%d\n", a.facilitySet[i].facCov);
 
@@ -376,19 +434,15 @@ std::vector<facility>myopic_facility_selection(std::vector<facility> a, int size
 	//printf("Max:%d Min:%d\n", max, min);
 	//cout << "Adaptdiv:"<<adaptdiv << endl;
 
-	std::random_device dev;
-	std::mt19937 rng(dev());
-	std::uniform_real_distribution<> dist(0.0, 1.0);
-
 	if (max == min)
 	{
 		for (int i = 0; i < size; i++)
 		{
-			temp_probSet.push_back(1.0);
+			temp_prob = 1.0;
 
 			float rnd = dist(rng);
 
-			if (rnd <= temp_probSet[i])
+			if (rnd <= temp_prob)
 			{
 				b.push_back(a[i]);
 
@@ -405,11 +459,11 @@ std::vector<facility>myopic_facility_selection(std::vector<facility> a, int size
 	{
 		for (int j = 0; j < size; j++)
 		{
-			temp_probSet.push_back(1.00 * (a[j].facCov - min) / (max - min));
+			temp_prob = 1.00 * (a[j].nfacCov - min) / (float)(max - min);
 
 			float rnd = dist(rng);
 
-			if (rnd <= temp_probSet[j])
+			if (rnd <= temp_prob)
 				//if(rnd<=temp_probSet[j])
 			{
 				b.push_back(a[j]);
@@ -429,8 +483,11 @@ bool compare(facility a, facility b)
 		return 0;
 }
 
+
+
 individual combine_ind(individual* a, individual* b, individual offspring_fac)
 {
+
 	std::vector<facility> temp_facilitySet;
 	int k = 0;	
 	
@@ -460,7 +517,21 @@ individual combine_ind(individual* a, individual* b, individual offspring_fac)
 	return offspring_fac;
 }
 
-void crossover(matepopulation* matepop_ptr, population* new_pop_ptr, FILE* writer) 
+float find_eloc_s(individual ind_ptr) {
+	
+	float eff;
+	int total_cov = 0;
+
+	for (int j = 0; j < ind_ptr.facilitySet.size(); j++)
+	{
+		total_cov += ind_ptr.facilitySet[j].facCov;
+	}
+	eff = (float)ind_ptr.fitness[1] / (float)total_cov;
+
+	return eff;
+}
+
+void crossover(matepopulation* matepop_ptr, population* new_pop_ptr) 
 {
 	int k = 0;
 
@@ -473,7 +544,7 @@ void crossover(matepopulation* matepop_ptr, population* new_pop_ptr, FILE* write
 		
 		new_pop_ptr->ind[k] = combine_ind(matepop_ptr->ind_ptr, temp_ptr, new_pop_ptr->ind[k]); //w.o cartesian filter	
 
-		if (new_pop_ptr->ind[k].facilitySet[0].CoordX<0)
+		if (new_pop_ptr->ind[k].facilitySet.size()==0)
 		{
 			printf("ZERO FACILITY INDEX: %d-- %f\n", k+1, new_pop_ptr->ind[k].facilitySet[0].CoordX);
 			cin >> k;
@@ -484,6 +555,23 @@ void crossover(matepopulation* matepop_ptr, population* new_pop_ptr, FILE* write
 
 }
 
+bool find_min(const facility& lhs, const facility& rhs)
+{
+	return lhs.nfacCov < rhs.nfacCov;
+}
+
+void M1_mutation(individual* ind_ptr) 
+{
+	auto min_it = std::min_element(ind_ptr->facilitySet.begin(), ind_ptr->facilitySet.end(), find_min);
+	ind_ptr->facilitySet.erase(min_it);
+	//cout << "Individual: " << i << " NumFac: " << temp_ptr->facilitySet.size() << endl;
+	//cout << "Individual: " << i << " Eff: " << efficiency[i]<<" Rnd: "<<rnd << endl;
+
+}
+void M2_mutation(individual ind, int i)
+{
+	ind=find_numDCP(ind, i, 1);
+}
 
 int indcmp(int* ptr1, int* ptr2)
 {
@@ -666,6 +754,7 @@ void find_numFac(population* pop_ptr) {
 	{
 		pop_ptr->ind_ptr = &(pop_ptr->ind[i]);
 		pop_ptr->ind_ptr->numFac = pop_ptr->ind_ptr->facilitySet.size();
+
 	}
 	
 }

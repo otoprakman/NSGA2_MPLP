@@ -10,11 +10,11 @@
 #include "keepaliven.h";
 #include "ReadWriteFiles.h";
 
-using namespace std;
-
 
 int main(int, char**)
 {
+	startingAll = clock();
+
 	int STOP;
 
 	old_pop_ptr = &(oldpop);
@@ -22,19 +22,57 @@ int main(int, char**)
 	mate_pop_ptr = &(matepop);
 
 	srand(time(NULL));
-	
-	clock_t start, end;
 
 	readWrite();						//Read Demand attributes from the file
 
 	old_pop_ptr = &(oldpop);
 	initPopulation(old_pop_ptr);		//Generate initial population
 	
+	/////-------Init Population check----------/////
+
+	//for (int i = 0; i < popSize; i++)
+	//{
+	//	individual* ind_ptr = &(oldpop.ind[i]);
+
+	//	for (int j = 0; j < ind_ptr->facilitySet.size(); j++)
+	//	{
+	//		std::cout <<i<< ". X: "<<ind_ptr->facilitySet[j].CoordX << "---Y: "<<ind_ptr->facilitySet[j].CoordY << std::endl;
+	//	}
+	//}
+	//std::cin >> STOP;
+
+	/////*************************************//////
+
 	old_pop_ptr = &(oldpop);
 	findCoverage(old_pop_ptr);			//Find coverage objective
 
+	////////----- Coverage Check -------////
+
+	for (int i = 0; i < popSize; i++)
+	{
+		individual* ind_ptr = &(oldpop.ind[i]);
+		std::cout << i << ". Coverage: " << ind_ptr->fitness[1] << std::endl;
+	}
+	//std::cin >> STOP;
+
+	//////*****************************/////
+
 	old_pop_ptr = &(oldpop);
-	find_numDCP(old_pop_ptr);			//Find cost objective
+	for (int i = 0; i < popSize; i++)
+	{
+		old_pop_ptr->ind[i]=find_numDCP(old_pop_ptr->ind[i], i, 0);			//Find cost objective
+		/*std::cout << i << ". Cost: " << old_pop_ptr->ind[i].fitness[0] <<"---NumFac: "<< old_pop_ptr->ind[i].facilitySet.size()<< std::endl;*/
+	}
+	std::cin >> STOP;
+
+	for (int i = 0; i < popSize; i++)
+	{
+
+		for (int j = 0; j < old_pop_ptr->ind[i].facilitySet.size(); j++)
+		{
+			old_pop_ptr->ind[i].facilitySet[j].facCov = findCoverage_facility(old_pop_ptr->ind[i].facilitySet[j]);
+		}
+	}
 
 	for (int j = 0; j < popSize; j++)
 	{
@@ -77,8 +115,6 @@ int main(int, char**)
 	{
 		old_pop_ptr = &(oldpop);		
 		mate_pop_ptr = &(matepop);
-
-		start = clock();
 		
 		counter += 1;
 
@@ -97,11 +133,6 @@ int main(int, char**)
 		//{
 		//	printf("%d\n", mate_pop_ptr->ind[i].numFac);
 		//}
-
-
-		end = clock();
-
-		printExecTime(start, end, selectTime);
 
 		/*for (int i = 0; i < 2*popSize; i++)
 		{
@@ -129,61 +160,174 @@ int main(int, char**)
 		}
 		*/
 
-		start = clock();
-		
-		crossover(mate_pop_ptr,new_pop_ptr,writer);	
-		
-		/* close the file*/
-		end = clock();
 
-		printExecTime(start, end, crossoverTime);
+		//////////----------- Efficiency of Coverage -----------------//////
+		int total_cov = 0;
+		float mean_efficiency = 0.0;
+		float sum_cov = 0.0;
+		float sum_fcov = 0.0;
+
+		for (int i = 0; i < popSize; i++)
+		{
+			for (int j = 0; j < old_pop_ptr->ind[i].facilitySet.size(); j++)
+			{
+				old_pop_ptr->ind[i].facilitySet[j].facCov = findCoverage_facility(old_pop_ptr->ind[i].facilitySet[j]);
+			}
+		}
+
+		if (generation == 0)
+		{
+			fprintf(writeEfficiency, "mean_Cov\t mean_Sum_fcov\t mean_eff\t max_eff\t min_eff\n ");
+		}
+
+		float max = 0;
+		float min = 999999;
+		
+		for (int i = 0; i < popSize; i++)
+		{
+			
+			for (int j = 0; j < old_pop_ptr->ind[i].facilitySet.size(); j++)
+			{
+				total_cov += old_pop_ptr->ind[i].facilitySet[j].facCov;
+				
+			}
+
+			sum_cov += (float)old_pop_ptr->ind[i].fitness[1];
+			
+			eloc[i] = find_eloc_s(old_pop_ptr->ind[i]);
+
+			mean_efficiency += (float)old_pop_ptr->ind[i].fitness[1] / (float)total_cov;
+			sum_fcov += (float)total_cov;
+			total_cov = 0;
+
+			if (eloc[i] > max)
+			{
+				max = eloc[i];
+			}
+			if (eloc[i] < min)
+			{
+				min = eloc[i];
+			}
+		}
+
+		cout << "Mean Efficiency: " << mean_efficiency / (float)popSize << endl;
+		fprintf(writeEfficiency, "%f\t %f\t %f\t %f\t %f\n", (sum_cov / (float)popSize), (sum_fcov / (float)popSize),
+			(mean_efficiency / (float)popSize), max, min);
+
+		mean_facility = 0;
+		
+		for (int i = 0; i < popSize; i++)
+		{
+			mean_facility += (float)old_pop_ptr->ind[i].facilitySet.size() / (float)popSize;
+		}
+
+		std::cout << "Population Mean Facility: " << mean_facility << std::endl;
+
+		crossover(mate_pop_ptr,new_pop_ptr);	
 	
+		new_pop_ptr = &(newpop);
 
-
+		find_numFac(new_pop_ptr);
+		
 		/////// LOOK FOR AN ALTERNATIVE INITIALIZATION !!!!
 		for (int i = 0; i < popSize; i++)
 		{
 			mate_pop_ptr->ind[i].facilitySet.clear();
 		}
 
-		new_pop_ptr = &(newpop);
-		find_numFac(new_pop_ptr);
+		float	meanFacility = 0.0;
+		int max3 = 0;
+		int min3 = 999999;
 
-		int	sumFacility=0;
-		int max = 0;
-		int min = 999999;
-
-		for (int i=0, j= 0; i < popSize, j < 2*popSize; i++, j+=2)
+		for (int i=0; i < popSize; i++)
 		{
-			sumFacility += new_pop_ptr->ind[i].numFac;
-			if (new_pop_ptr->ind[i].numFac > max)
+			meanFacility += (float)new_pop_ptr->ind[i].numFac/(float)popSize;
+			if (new_pop_ptr->ind[i].numFac > max3)
 			{
-				max = new_pop_ptr->ind[i].numFac;
+				max3 = new_pop_ptr->ind[i].numFac;
 			}
-			if (new_pop_ptr->ind[i].numFac < min)
+			if (new_pop_ptr->ind[i].numFac < min3)
 			{
-				min = new_pop_ptr->ind[i].numFac;
+				min3 = new_pop_ptr->ind[i].numFac;
 			}
 			//float ratio = ((float)new_pop_ptr->ind[i].numFac) / ((float)mate_pop_ptr->ind[j].numFac * (float)mate_pop_ptr->ind[j + 1].numFac);
 
 			//fprintf(writer, "%f\n", ratio);
 		}
 
-		fprintf(writeSumFacility, "%d\t %d\t %d\n", sumFacility, max, min);
+		if (generation == 0)
+		{
+			fprintf(writeBeforeSelection, "maxBefore\t meanBefore\t minBefore\n ");
+		}
 
-		start = clock();
+		fprintf(writeBeforeSelection, "%d\t %f\t %d\n", max3, meanFacility, min3);
+
+		new_pop_ptr = &(newpop);
+
+		for (int i = 0; i < popSize; i++)
+		{
+			new_pop_ptr->ind[i]=find_numDCP(new_pop_ptr->ind[i], i, 0);			//Find cost objective
+		}
 
 		new_pop_ptr = &(newpop);
 		findCoverage(new_pop_ptr);			//Find coverage objective
 
 		new_pop_ptr = &(newpop);
-		find_numDCP(new_pop_ptr);			//Find cost objective
 
-		end = clock();
+		////FIND EFFICIENCY SCORE FOR MUTATION
 
-		printExecTime(start, end, findValueTime);
+		for (int i = 0; i < popSize; i++)
+		{
+			for (int j = 0; j < new_pop_ptr->ind[i].facilitySet.size(); j++)
+			{
+				new_pop_ptr->ind[i].facilitySet[j].facCov = findCoverage_facility(new_pop_ptr->ind[i].facilitySet[j]);
+			}
+		}
+
+		for (int i = 0; i < popSize; i++)
+		{
+			eloc[i] = 0;
+			eloc[i] = find_eloc_s(new_pop_ptr->ind[i]);
+			//cout << i << ".eloc: " << eloc[i] << endl;
+		}
+
+		for (int i = 0; i < popSize; i++)
+		{
+			individual* temp_ptr = &(new_pop_ptr->ind[i]);
+
+			float rnd = dist(rng);
+			if (rnd < (1 - eloc[i]))
+			{
+				rnd = dist(rng);
+
+				if (rnd < eadj[i])
+				{
+					M1_mutation(temp_ptr);
+					std::cout << "M1--MUTATED!!: " << i << std::endl;
+				}
+				else
+				{
+					M2_mutation(new_pop_ptr->ind[i], i);
+					std::cout << "M2--MUTATED!!: " << i << std::endl;
+				}
+			}
+			/*else
+			{
+				continue;
+				
+				rnd = dist(rng);
+
+				if (rnd < 1 - ((float)temp_ptr->fitness[1] / (float)numDemand))
+				{
+					
+				}
+			}*/
+		}
+		//////////////////////////////////////
 
 		new_pop_ptr = &(newpop);
+		find_numFac(new_pop_ptr);
+
 		/*for (int i = 0; i < popSize; i++)
 		{
 			printf("%d-(NEW) RS:%d - DC:%d - FAC:%d - Cost:%d - Cov:%d\n", i + 1, new_pop_ptr->ind[i].numRS, new_pop_ptr->ind[i].numDC,
@@ -206,21 +350,17 @@ int main(int, char**)
 						new_pop_ptr->ind[i].facilitySet[j].CoordY);
 				}
 			}*/
-
-			start = clock();
-
 			
 			/*Elitism And Sharing Implemented*/
 			keepalive(old_pop_ptr, new_pop_ptr, last_pop_ptr, generation + 1); 
-			
-
-			int	sumFacility2 = 0;
+			last_pop_ptr = &(lastpop);
+			float	meanFacility2 = 0;
 			int max2 = 0;
 			int min2 = 999999;
-
-			for (int i = 0, j = 0; i < popSize, j < 2 * popSize; i++, j += 2)
+		
+			for (int i = 0; i < popSize; i++)
 			{
-				sumFacility2 += last_pop_ptr->ind[i].numFac;
+				meanFacility2 += (float)last_pop_ptr->ind[i].numFac / (float)popSize;
 				if (last_pop_ptr->ind[i].numFac > max2)
 				{
 					max2 = last_pop_ptr->ind[i].numFac;
@@ -233,55 +373,57 @@ int main(int, char**)
 
 				//fprintf(writer, "%f\n", ratio);
 			}
-
-			fprintf(writeSumFacilityAfterSelection, "%d\t %d\t %d\n", sumFacility2, max2, min2);
-
-			end = clock();
-
-			printExecTime(start, end, keepAliveTime);
-
-			start = clock();
+			if (generation == 0)
+			{
+				fprintf(writeAfterSelection, "maxAfter\t meanAfter\t minAfter\n");
+			}
+			fprintf(writeAfterSelection, "%d\t %f\t %d\n", max2,meanFacility2, min2);
 
 			/////// LOOK FOR AN ALTERNATIVE INITIALIZATION !!!!
 			for (int i = 0; i < popSize; i++)
 			{
 				old_pop_ptr->ind[i].facilitySet.clear();				
 			}
-			
+
 			/////// LOOK FOR AN ALTERNATIVE INITIALIZATION !!!!
 			for (int i = 0; i < popSize; i++)
 			{
 				new_pop_ptr->ind[i].facilitySet.clear();				
 			}
-			end = clock();
-
-			printExecTime(start, end, deleteOldTime);
 
 			last_pop_ptr = &(lastpop);
 			
 			//Print Last Generation Solutions
 
-			if (generation>=generationNum-1)
+			if (generation % numSnap == 0 || generation == generationNum-1)
 			{
+				if (generation == 0)
+				{
+					fprintf(writeResult, "Gen\t Sol\t Cost\t Cov\t FAC\t DC\t RS\t XCoord\t YCoord\t MSTTime\t SortingTime\t TotalTime\n");
+				}
+
 				int count = 0;
 				for (int i = 0; i < popSize; i++)
 				{
 					if (last_pop_ptr->ind[i].rank==1)
 					{
 						count += 1;
-						printf("%d-(LAST) RS:%d - DC:%d - FAC:%d - Cost:%d - Cov:%d - Rank:%d- %d.RankSize:%d\n", count, last_pop_ptr->ind[i].numRS, last_pop_ptr->ind[i].numDC,
+						/*printf("%d-(LAST) RS:%d - DC:%d - FAC:%d - Cost:%d - Cov:%d - Rank:%d- %d.RankSize:%d\n", count, last_pop_ptr->ind[i].numRS, last_pop_ptr->ind[i].numDC,
 							last_pop_ptr->ind[i].numFac, last_pop_ptr->ind[i].fitness[0], last_pop_ptr->ind[i].fitness[1], last_pop_ptr->ind[i].rank,
-							i + 1, last_pop_ptr->rankno[i]);
+							i + 1, last_pop_ptr->rankno[i]);	*/					
 
-						fprintf(writeCost, "%d\n", -1 * last_pop_ptr->ind[i].fitness[0]);
-						fprintf(writeCoverage, "%d\n", last_pop_ptr->ind[i].fitness[1]);
-						fprintf(writenumFac, "%d\n", last_pop_ptr->ind[i].numFac);
-
-						for (int j = 0; j < last_pop_ptr->ind[i].numFac; j++)
+						if (generation == generationNum-1)
 						{
-							fprintf(writeCoordX, "%f\n", last_pop_ptr->ind[i].facilitySet[j].CoordX);
-							fprintf(writeCoordY, "%f\n", last_pop_ptr->ind[i].facilitySet[j].CoordY);
+							endingAll = clock();
+							totaltime = ExecTime(startingAll, endingAll);
+						}
 
+						for (int j = 0; j < last_pop_ptr->ind[i].facilitySet.size(); j++)
+						{
+							fprintf(writeResult, "%d\t %d\t %d\t %d\t %d\t %d\t %d\t %f\t %f\t %f\t %f\t %f\n", generation + 1, count, last_pop_ptr->ind[i].fitness[0]*-1, last_pop_ptr->ind[i].fitness[1],
+								last_pop_ptr->ind[i].numFac, last_pop_ptr->ind[i].numDC, last_pop_ptr->ind[i].numRS,
+								last_pop_ptr->ind[i].facilitySet[j].CoordX, last_pop_ptr->ind[i].facilitySet[j].CoordY,
+								msttime, sortingtime, totaltime);
 						}
 					}
 
@@ -295,8 +437,6 @@ int main(int, char**)
 
 			old_pop_ptr = &(oldpop);
 			last_pop_ptr = &(lastpop);
-
-			start = clock();
 
 			for (int j = 0; j < popSize; j++)
 			{
@@ -339,10 +479,6 @@ int main(int, char**)
 				last_pop_ptr->ind[i].facilitySet.clear();				
 			}
 
-			end = clock();
-
-			printExecTime(start, end, copyNewGenTime);
-				
 			printf("END-OF GENERATION: %d\n", generation + 1);
 	} // for the last generation
 
@@ -350,22 +486,11 @@ int main(int, char**)
 	 // /************************************************************************/
 	
 	cout << "END" << endl;
-	fclose(writer);
-	fclose(writeCost);
-	fclose(writeCoverage);
-	fclose(writeSumFacility);
-	fclose(writenumFac);
-	fclose(writeCoordX);
-	fclose(writeCoordY);
-	fclose(writeSumFacilityAfterSelection);
+	fclose(writeBeforeSelection);
+	fclose(writeAfterSelection);
+	fclose(writeEfficiency);
+	fclose(writeResult);
 
-
-	fclose(selectTime);
-	fclose(crossoverTime);
-	fclose(findValueTime);
-	fclose(keepAliveTime);
-	fclose(deleteOldTime);
-	fclose(copyNewGenTime);
 	if (Plot)
 	{
 		RPath = string("C:\\\"Program Files\"\\R\\R-3.6.2\\bin\\R.exe < C:\\\"Users\"\\ThinkPad\\Desktop\\Thesis\\Codes\\Visualization_Algorithms\\Visualization_Algorithms\\Cluster\\MIP_Sol1_Sol2_Compare.R --no-save");

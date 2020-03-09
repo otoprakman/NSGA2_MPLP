@@ -204,7 +204,7 @@ bool isInMinHeap(struct MinHeap* minHeap, int v)
 }
 
 // A utility function used to print the constructed MST 
-void printArr(int arr[], int n)
+void printArr(vector<int> arr, int n)
 {
 	for (int i = 1; i < n; ++i)
 		printf("%d - %d\n", arr[i], i);
@@ -212,7 +212,7 @@ void printArr(int arr[], int n)
 
 // The main function that constructs Minimum Spanning Tree (MST) 
 // using Prim's algorithm 
-int PrimMST(struct PGraph* graph)
+int PrimMST(struct PGraph* graph, int index)
 {
 	int V = graph->V; // Get the number of vertices in graph 
 	std::vector<int> parent; // Array to store constructed MST 
@@ -267,14 +267,36 @@ int PrimMST(struct PGraph* graph)
 
 	int DC = 1;
 
+	int min = 99999;
+	eadj[index] = 0;
+
 	for (int i = 1; i < key.size(); i++)
 	{
 		//cout << "Distance of " << key[i] << endl;
 		if (key[i] > fp)
 		{
-			DC += 1;
+			DC += 1;			
+		}
+		else
+		{
+			eadj[index] += key[i] / fp;
+			
+			if ((key[i] / fp) < min)
+			{
+				min = key[i] / fp;
+
+				mutated_indices[0] = i - 1; 
+				mutated_indices[1] = i;
+				mutated_distance = key[i];
+			}
 		}
 	}
+
+	eadj[index] = eadj[index] / (key.size() - DC + 1);
+	
+	printArr(parent, V);
+	std::cin >> DC;
+	//cout << index << ". eff " << eadj[index] << " Edges: " << key.size() << " DC: " << DC << endl;
 	return DC;
 	
 }
