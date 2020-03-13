@@ -69,8 +69,8 @@ C:\Users\ThinkPad\Desktop\Thesis\Codes\ThesisNSGA-II\Thesis-Heuristic\keepaliven
 C:\Users\ThinkPad\Desktop\Thesis\Codes\ThesisNSGA-II\Thesis-Heuristic\keepaliven.h(505,19): warning C4244: '=': conversion from 'float' to 'int', possible loss of data
 C:\Users\ThinkPad\Desktop\Thesis\Codes\ThesisNSGA-II\Thesis-Heuristic\Algorithm.cpp(11,10): warning C4067: unexpected tokens following preprocessor directive - expected a newline
 C:\Users\ThinkPad\Desktop\Thesis\Codes\ThesisNSGA-II\Thesis-Heuristic\Algorithm.cpp(24,12): warning C4244: 'argument': conversion from 'time_t' to 'unsigned int', possible loss of data
-C:\Users\ThinkPad\Desktop\Thesis\Codes\ThesisNSGA-II\Thesis-Heuristic\Algorithm.cpp(298,14): warning C4244: 'initializing': conversion from 'double' to 'float', possible loss of data
-C:\Users\ThinkPad\Desktop\Thesis\Codes\ThesisNSGA-II\Thesis-Heuristic\Algorithm.cpp(301,15): warning C4244: '=': conversion from 'double' to 'float', possible loss of data
-C:\Users\ThinkPad\Desktop\Thesis\Codes\ThesisNSGA-II\Thesis-Heuristic\Algorithm.cpp(418,42): warning C4244: 'argument': conversion from 'clock_t' to 'float', possible loss of data
-C:\Users\ThinkPad\Desktop\Thesis\Codes\ThesisNSGA-II\Thesis-Heuristic\Algorithm.cpp(418,29): warning C4244: 'argument': conversion from 'clock_t' to 'float', possible loss of data
+C:\Users\ThinkPad\Desktop\Thesis\Codes\ThesisNSGA-II\Thesis-Heuristic\Algorithm.cpp(310,14): warning C4244: 'initializing': conversion from 'double' to 'float', possible loss of data
+C:\Users\ThinkPad\Desktop\Thesis\Codes\ThesisNSGA-II\Thesis-Heuristic\Algorithm.cpp(313,15): warning C4244: '=': conversion from 'double' to 'float', possible loss of data
+C:\Users\ThinkPad\Desktop\Thesis\Codes\ThesisNSGA-II\Thesis-Heuristic\Algorithm.cpp(443,42): warning C4244: 'argument': conversion from 'clock_t' to 'float', possible loss of data
+C:\Users\ThinkPad\Desktop\Thesis\Codes\ThesisNSGA-II\Thesis-Heuristic\Algorithm.cpp(443,29): warning C4244: 'argument': conversion from 'clock_t' to 'float', possible loss of data
   Thesis-Heuristic.vcxproj -> C:\Users\ThinkPad\Desktop\Thesis\Codes\ThesisNSGA-II\x64\Debug\Thesis-Heuristic.exe

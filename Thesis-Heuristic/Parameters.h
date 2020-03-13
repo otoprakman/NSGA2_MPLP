@@ -21,7 +21,7 @@ const int popSize = 50;			//Number of solutions in the solution space (populatio
 const float mu = 0.5;			//Generating random numbers from normal distribution, mu is the parameter of the normal dist.
 const float sigma = sqrt(0.5);		//parameter of the normal distribution
 const int generationNum = 300;		//Total generation
-const int maxInitFacility = 10;		/*While generating initial population, 
+const int maxInitFacility = 50;		/*While generating initial population, 
 									number of facilities in each solution is randomly determined.
 									This parameter is for the maximum number of facilities in each population.*/
 const int minInitFacility = 1;		//Minimum number of facilities in initial population

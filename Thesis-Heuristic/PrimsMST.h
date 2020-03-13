@@ -294,8 +294,8 @@ int PrimMST(struct PGraph* graph, int index)
 
 	eadj[index] = eadj[index] / (key.size() - DC + 1);
 	
-	printArr(parent, V);
-	std::cin >> DC;
+	//printArr(parent, V);
+	//std::cin >> DC;
 	//cout << index << ". eff " << eadj[index] << " Edges: " << key.size() << " DC: " << DC << endl;
 	return DC;
 	

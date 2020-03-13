@@ -63,16 +63,16 @@ int main(int, char**)
 		old_pop_ptr->ind[i]=find_numDCP(old_pop_ptr->ind[i], i, 0);			//Find cost objective
 		/*std::cout << i << ". Cost: " << old_pop_ptr->ind[i].fitness[0] <<"---NumFac: "<< old_pop_ptr->ind[i].facilitySet.size()<< std::endl;*/
 	}
-	std::cin >> STOP;
 
-	for (int i = 0; i < popSize; i++)
-	{
+	//for (int i = 0; i < popSize; i++)
+	//{
 
-		for (int j = 0; j < old_pop_ptr->ind[i].facilitySet.size(); j++)
-		{
-			old_pop_ptr->ind[i].facilitySet[j].facCov = findCoverage_facility(old_pop_ptr->ind[i].facilitySet[j]);
-		}
-	}
+	//	for (int j = 0; j < old_pop_ptr->ind[i].facilitySet.size(); j++)
+	//	{
+	//		old_pop_ptr->ind[i].facilitySet[j].facCov = findCoverage_facility(old_pop_ptr->ind[i].facilitySet[j]);
+	//		//std::cout << "Solutiion: " << i << " Facility: " << j << " Coverage: " << old_pop_ptr->ind[i].facilitySet[j].facCov << std::endl;
+	//	}
+	//}	
 
 	for (int j = 0; j < popSize; j++)
 	{
@@ -90,14 +90,15 @@ int main(int, char**)
 
 	printf("**** REPORTS INITIAL POPULATION ****\n");
 
-	/*for (int i = 0; i < popSize; i++)		
+	for (int i = 0; i < popSize; i++)		
 	{
-		printf("%d- RS:%d - DC:%d - FAC:%d - Cost:%d - Cov:%d - Rank:%d - %d.RankSize:%d\n", i + 1, old_pop_ptr->ind[i].numRS, old_pop_ptr->ind[i].numDC,
-			old_pop_ptr->ind[i].numFac, old_pop_ptr->ind[i].fitness[0], old_pop_ptr->ind[i].fitness[1], old_pop_ptr->ind[i].rank,
+		printf("%d- RS:%d - DC:%d - FAC:%d - Cost:%d - Cov:%d - Rank:%d - Crowd-Dist:%f - %d.RankSize:%d\n", i + 1, old_pop_ptr->ind[i].numRS, old_pop_ptr->ind[i].numDC,
+			old_pop_ptr->ind[i].numFac, old_pop_ptr->ind[i].fitness[0], old_pop_ptr->ind[i].fitness[1], old_pop_ptr->ind[i].rank,old_pop_ptr->ind[i].cub_len,
 			i + 1, old_pop_ptr->rankno[i]);
 
 	}
-	printf("Maximum Rank in Initial Population:%d\n", old_pop_ptr->maxrank);*/
+	printf("Maximum Rank in Initial Population:%d\n", old_pop_ptr->maxrank);
+
 
 	int maxrank1;
 
@@ -134,11 +135,11 @@ int main(int, char**)
 		//	printf("%d\n", mate_pop_ptr->ind[i].numFac);
 		//}
 
-		/*for (int i = 0; i < 2*popSize; i++)
-		{
-			printf("%d-(MATE) RS:%d - DC:%d - FAC:%d - Cost:%d - Cov:%d\n", i + 1, mate_pop_ptr->ind[i].numRS, mate_pop_ptr->ind[i].numDC,
-				mate_pop_ptr->ind[i].numFac, mate_pop_ptr->ind[i].fitness[0], mate_pop_ptr->ind[i].fitness[1]);
-		}*/
+		//for (int i = 0; i < 2*popSize; i++)
+		//{
+		//	printf("%d-(MATE) RS:%d - DC:%d - FAC:%d - Cost:%d -  Cov:%d - Crowd-Dist:%f\n", i + 1, mate_pop_ptr->ind[i].numRS, mate_pop_ptr->ind[i].numDC,
+		//		mate_pop_ptr->ind[i].numFac, mate_pop_ptr->ind[i].fitness[0], mate_pop_ptr->ind[i].fitness[1], mate_pop_ptr->ind[i].cub_len);
+		//}
 		//for (int i = 0; i < 50; i++)
 		//{
 		//	printf("NEWPOP:RANK:%d, %f\n", mate_pop_ptr->ind[0].numFac, mate_pop_ptr->ind[0].facilitySet[i].CoordX);
@@ -163,7 +164,7 @@ int main(int, char**)
 
 		//////////----------- Efficiency of Coverage -----------------//////
 		int total_cov = 0;
-		float mean_efficiency = 0.0;
+		float mean_eloc = 0.0;
 		float sum_cov = 0.0;
 		float sum_fcov = 0.0;
 
@@ -177,7 +178,7 @@ int main(int, char**)
 
 		if (generation == 0)
 		{
-			fprintf(writeEfficiency, "mean_Cov\t mean_Sum_fcov\t mean_eff\t max_eff\t min_eff\n ");
+			fprintf(writeEfficiency, "mean_Cov\t mean_Sum_fcov\t mean_eloc\t max_eloc\t min_eloc\n ");
 		}
 
 		float max = 0;
@@ -188,15 +189,14 @@ int main(int, char**)
 			
 			for (int j = 0; j < old_pop_ptr->ind[i].facilitySet.size(); j++)
 			{
-				total_cov += old_pop_ptr->ind[i].facilitySet[j].facCov;
-				
+				total_cov += old_pop_ptr->ind[i].facilitySet[j].facCov;				
 			}
 
 			sum_cov += (float)old_pop_ptr->ind[i].fitness[1];
 			
 			eloc[i] = find_eloc_s(old_pop_ptr->ind[i]);
 
-			mean_efficiency += (float)old_pop_ptr->ind[i].fitness[1] / (float)total_cov;
+			mean_eloc += (float)old_pop_ptr->ind[i].fitness[1] / (float)total_cov;
 			sum_fcov += (float)total_cov;
 			total_cov = 0;
 
@@ -210,10 +210,22 @@ int main(int, char**)
 			}
 		}
 
-		cout << "Mean Efficiency: " << mean_efficiency / (float)popSize << endl;
+		std::cout << "Mean eloc_s: " << mean_eloc / (float)popSize << std::endl;
+		std::cout << "Max eloc_s: " << max << std::endl;
 		fprintf(writeEfficiency, "%f\t %f\t %f\t %f\t %f\n", (sum_cov / (float)popSize), (sum_fcov / (float)popSize),
-			(mean_efficiency / (float)popSize), max, min);
-
+			(mean_eloc / (float)popSize), max, min);
+		if (max>1)
+		{
+			for (int i = 0; i < popSize; i++)
+			{
+				for (int j = 0; j < old_pop_ptr->ind[i].facilitySet.size(); j++)
+				{
+					std::cout << i << "." << j << " fcov_s: " << old_pop_ptr->ind[i].facilitySet[j].facCov << "---Cov_s: "
+						<< old_pop_ptr->ind[i].fitness[1] << "---eloc_s: " << eloc[i] << std::endl;
+				}
+			}
+			std::cin >> STOP;
+		}
 		mean_facility = 0;
 		
 		for (int i = 0; i < popSize; i++)
@@ -276,13 +288,13 @@ int main(int, char**)
 
 		////FIND EFFICIENCY SCORE FOR MUTATION
 
-		for (int i = 0; i < popSize; i++)
-		{
-			for (int j = 0; j < new_pop_ptr->ind[i].facilitySet.size(); j++)
-			{
-				new_pop_ptr->ind[i].facilitySet[j].facCov = findCoverage_facility(new_pop_ptr->ind[i].facilitySet[j]);
-			}
-		}
+		//for (int i = 0; i < popSize; i++)
+		//{
+		//	for (int j = 0; j < new_pop_ptr->ind[i].facilitySet.size(); j++)
+		//	{
+		//		new_pop_ptr->ind[i].facilitySet[j].facCov = findCoverage_facility(new_pop_ptr->ind[i].facilitySet[j]);
+		//	}
+		//}
 
 		for (int i = 0; i < popSize; i++)
 		{
@@ -328,11 +340,11 @@ int main(int, char**)
 		new_pop_ptr = &(newpop);
 		find_numFac(new_pop_ptr);
 
-		/*for (int i = 0; i < popSize; i++)
-		{
-			printf("%d-(NEW) RS:%d - DC:%d - FAC:%d - Cost:%d - Cov:%d\n", i + 1, new_pop_ptr->ind[i].numRS, new_pop_ptr->ind[i].numDC,
-				new_pop_ptr->ind[i].numFac, new_pop_ptr->ind[i].fitness[0], new_pop_ptr->ind[i].fitness[1]);
-		}*/
+		//for (int i = 0; i < popSize; i++)
+		//{
+		//	printf("%d-(NEW) RS:%d - DC:%d - FAC:%d - Cost:%d - Cov:%d - Crowd-Dist:%f\n", i + 1, new_pop_ptr->ind[i].numRS, new_pop_ptr->ind[i].numDC,
+		//		new_pop_ptr->ind[i].numFac, new_pop_ptr->ind[i].fitness[0], new_pop_ptr->ind[i].fitness[1], new_pop_ptr->ind[i].cub_len);
+		//}
 			/*-------------------SELECTION KEEPING FRONTS ALIVE--------------*/
 			old_pop_ptr = &(oldpop);
 			new_pop_ptr = &(newpop);
@@ -353,6 +365,19 @@ int main(int, char**)
 			
 			/*Elitism And Sharing Implemented*/
 			keepalive(old_pop_ptr, new_pop_ptr, last_pop_ptr, generation + 1); 
+
+	/*		for (int i = 0; i < popSize; i++)
+			{
+				printf("%d-(LAST) RS:%d - DC:%d - FAC:%d - Cost:%d - Cov:%d - Crowd-Dist:%f\n", i + 1, last_pop_ptr->ind[i].numRS, last_pop_ptr->ind[i].numDC,
+					last_pop_ptr->ind[i].numFac, last_pop_ptr->ind[i].fitness[0], last_pop_ptr->ind[i].fitness[1], last_pop_ptr->ind[i].cub_len);
+			}
+
+			if (generation==100)
+			{
+				std::cin >> STOP;
+
+			}*/
+
 			last_pop_ptr = &(lastpop);
 			float	meanFacility2 = 0;
 			int max2 = 0;
@@ -485,11 +510,11 @@ int main(int, char**)
 	 // /*                   Generation Loop Ends                                */
 	 // /************************************************************************/
 	
-	cout << "END" << endl;
-	fclose(writeBeforeSelection);
-	fclose(writeAfterSelection);
-	fclose(writeEfficiency);
-	fclose(writeResult);
+	std::cout << "END" << endl;
+	std::fclose(writeBeforeSelection);
+	std::fclose(writeAfterSelection);
+	std::fclose(writeEfficiency);
+	std::fclose(writeResult);
 
 	if (Plot)
 	{
