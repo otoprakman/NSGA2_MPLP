@@ -7,9 +7,9 @@ typedef struct
   int maxrank,   /*Max rank of the global population*/
     rankindices[2*popSize][2*popSize], /*record of array of individual numbers at
 				  a particular rank [rank][individual index] */
-    rankno[2*maxpop];           /*record of no. of individuals at a particular rank*/
+    rankno[2*popSize];           /*record of no. of individuals at a particular rank*/
 
-  individual ind[2*maxpop],
+  individual ind[2*popSize],
       * ind_ptr;
 }globpop;
 
@@ -34,7 +34,7 @@ void gshare(int rnk);
 void finalsort(int rnk);
 
 int left,Lastrank;
-float fparaglob[2*maxpop][2];
+float fparaglob[2*popSize][2];
 
 void keepalive(population *pop1_ptr,population *pop2_ptr,population *pop3_ptr,int gen)
 {
@@ -416,7 +416,7 @@ void grank(globpop* global_pop_ptr)
 void gsort(int rnk,int sel)
 {
   int i,j,a,q;
-  float array[2*maxpop][2],temp,temp1;
+  float array[2*popSize][2],temp,temp1;
   
   q = globalpop.rankno[rnk-1];
   
@@ -455,7 +455,7 @@ void gsort(int rnk,int sel)
 
 void gshare(int rnk)
 {
-  float length[2*maxpop][2],max;
+  float length[2*popSize][2],max;
   int i,j,m1,a ;
   float min, Diff;  // Added 18.08.2003
 

@@ -4,53 +4,67 @@
 
 
 //////******* PARAMETER SETTINGS ********//////
-int counter = 0;
 
 std::string RPath;					// Path of R.exe
 
 const bool Plot = 1;
-const bool adaptive = 1;
-const bool dynamic = 0;
+const bool adaptive = 1;			//Adaptive Facility Selection
+const bool dynamic = 0;				//Dynamic Facilty Selection
+const bool normal = 0;				//Normal Facility Selection
+const bool improvement = 1;			//Use improvement
 const int numSnap = 50;
 
-const int costDC = 4;			//Cost of Opening a new DC
-const int costRS = 1;			//Cost of opening a new RS
-const float fd = 1.0;			//Distance for Coverage Constraint
-const float fp = 2.0;			//Distance for Connectivity Constraint
-const int popSize = 50;			//Number of solutions in the solution space (population of the genetic algorithm)
-const float mu = 0.5;			//Generating random numbers from normal distribution, mu is the parameter of the normal dist.
+const int costDC = 4;				//Cost of opening a new DC
+const int costRS = 1;				//Cost of opening a new RS
+const float rd = 1.0;				//Distance for Coverage Constraint
+const float rc = 2.0;				//Distance for Connectivity Constraint
+const int popSize = 50;				//Number of solutions in the solution space (population of the genetic algorithm)
+const float mu = 0.5;				//Generating random numbers from normal distribution, mu is the parameter of the normal dist.
 const float sigma = sqrt(0.5);		//parameter of the normal distribution
-const int generationNum = 300;		//Total generation
-const int maxInitFacility = 50;		/*While generating initial population, 
+const int ngen = 300;				//Total generation
+const int maxInitFacility = 100;	/*While generating initial population, 
 									number of facilities in each solution is randomly determined.
 									This parameter is for the maximum number of facilities in each population.*/
 const int minInitFacility = 1;		//Minimum number of facilities in initial population
-//const int maxlimit_facility = 44;   //Allow maximum number of facilities in the mating pool (including)
-const int minlimit_facility = 0;	/*If it is 1, that indicates individuals that has at least 2 or 
-									greater number of facilities can be in the matingpool. (not including)*/
-const float cutoff = 0.6;			//Cutoff value for the cartesian filter function
 
-const int numDemand = 600;		//Number of Discrete Demand Points
-const float minLoc = 0.0;		//For initial population facilities are randomly placed, 
-const float maxLoc = 10.0;		//hence x-y coordinate limits are defined
+//////******* PROBLEM SETTINGS ********//////
+
+const int numDemand = 600;			//Number of Discrete Demand Points
+const float minLoc = 0.0;			//For initial population facilities are randomly placed, 
+const float maxLoc = 10.0;			//hence x-y coordinate limits are defined
+
+//////******* VARIABLES ********//////
 
 const int maxfun = 2;				//Number of objectives in the problem (Cost:0 / Coverage:1)
-const int maxpop = popSize;			//Array size that stores the individual number at a rank
 
-float eloc[popSize];			//eloc_s Location Efficiency Score
-float mean_facility;				//Mean Facility at the population
-float eadj[popSize];		//Adjacency Efficiency Score
+float encov[popSize];				//Nonoverlapping coverage efficiency of an individual
+float avg_fac;						//Mean Facility at the population
+float ecov[popSize];				//Demand coverage efficiency of an individual
 
-int mutated_indices[2];
-float mutated_distance;
+float tcov = 0.5;					//Threshold for overlapping coverage
+float tncov = 0.5;					//Threshold for non-overlapping coverage
+
+//////******* COUNT VARIABLES ********//////
+
+int m1Count = 0;
+int m2CountS1 = 0;
+int m2CountS2 = 0;
+int m3Count = 0;
+
+int g_counter = 0;
+
+//////******* TIME VARIABLES ********//////
 
 float msttime = 0;
 float totaltime = 0;
-float sortingtime = 0;
+float fselectiontime = 0;
+float mutationtime = 0;
 clock_t starting;
 clock_t ending;
 clock_t startingAll;
 clock_t endingAll;
+
+//////******* FUNDAMENTAL VARIABLES ********//////
 
 typedef struct 						//Demand Points
 {
@@ -64,15 +78,8 @@ typedef struct 						//Facility points
 	float CoordX;
 	float CoordY;
 	int facCov;
-	int nfacCov;						//nfacCov: individual coverage of the facility. not considering overlapping coverage
+	int nfacCov;					//nfacCov: individual coverage of the facility. not considering overlapping coverage
 }facility;
-
-//typedef struct 						//Facility Set which is required while array of facilities will be manipulated
-//{
-//	std::vector<facility> facilitySet;
-//
-//}facilitySet;
-
 
 typedef struct
 {
@@ -92,8 +99,8 @@ typedef struct
 {
 	int rankindices[popSize][popSize];
 	int maxrank;				  /*Maximum rank present in the population*/
-	int rankno[maxpop];			  /*record of no. of individuals at a particular rank*/
-	individual ind[maxpop],
+	int rankno[popSize];			  /*record of no. of individuals at a particular rank*/
+	individual ind[popSize],
 		* ind_ptr;
 
 }population;
@@ -101,11 +108,13 @@ typedef struct
 typedef struct
 {
 	int maxrank;				 /*Maximum rank that is present in the population*/
-	int rankno[maxpop];		     /*record of no. of individuals at a particular rank*/
-	individual ind[maxpop*2],
+	int rankno[popSize];		     /*record of no. of individuals at a particular rank*/
+	individual ind[popSize*2],
 		* ind_ptr;
 
 }matepopulation;
+
+//////******* GLOBAL VARIABLES ********//////
 
 population oldpop,
 newpop,
@@ -117,6 +126,5 @@ lastpop,
 matepopulation
 matepop,
 * mate_pop_ptr;
-/*Defining the population Structures*/
 
 demand demandSet;

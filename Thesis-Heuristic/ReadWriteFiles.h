@@ -1,17 +1,18 @@
 #pragma once
-#include <fstream>
-#include <stdio.h>
-#include <stdlib.h>
+
 
 FILE
 * writeBeforeSelection,
 * writeAfterSelection,
 * writeEfficiency,
-* writeResult;
+* writeResult,
+* writeMutationCount,
+* writeOffspringEfficiency,
+* writeafterMutOffEff;
 
-std::ifstream inputValue("C:\\Users\\ThinkPad\\Desktop\\Thesis\\Codes\\Visualization_Algorithms\\Visualization_Algorithms\\Cluster\\demand.txt", std::ifstream::in);
-std::ifstream inputcoordX("C:\\Users\\ThinkPad\\Desktop\\Thesis\\Codes\\Visualization_Algorithms\\Visualization_Algorithms\\Cluster\\coordx(Customer).txt", std::ifstream::in);
-std::ifstream inputcoordY("C:\\Users\\ThinkPad\\Desktop\\Thesis\\Codes\\Visualization_Algorithms\\Visualization_Algorithms\\Cluster\\coordy(Customer).txt", std::ifstream::in);
+std::ifstream inputValue("C:\\Users\\ThinkPad\\Desktop\\Thesis\\Codes\\Visualization_Algorithms\\Visualization_Algorithms\\SolomonRC101\\demand.txt", std::ifstream::in);
+std::ifstream inputcoordX("C:\\Users\\ThinkPad\\Desktop\\Thesis\\Codes\\Visualization_Algorithms\\Visualization_Algorithms\\SolomonRC101\\coordx.txt", std::ifstream::in);
+std::ifstream inputcoordY("C:\\Users\\ThinkPad\\Desktop\\Thesis\\Codes\\Visualization_Algorithms\\Visualization_Algorithms\\SolomonRC101\\coordy.txt", std::ifstream::in);
 
 void readWrite()
 {
@@ -20,9 +21,10 @@ void readWrite()
 	writeAfterSelection = fopen("C:\\Users\\ThinkPad\\Desktop\\Thesis\\Codes\\Visualization_Algorithms\\Visualization_Algorithms\\Heuristic_Results\\SumFacilityAfterSelection.txt", "w");
 	writeEfficiency = fopen("C:\\Users\\ThinkPad\\Desktop\\Thesis\\Codes\\Visualization_Algorithms\\Visualization_Algorithms\\Heuristic_Results\\EfficiencyScores.txt", "w");
 	writeResult = fopen("C:\\Users\\ThinkPad\\Desktop\\Thesis\\Codes\\Visualization_Algorithms\\Visualization_Algorithms\\Heuristic_Results\\Result.txt", "w");
-
+	writeMutationCount = fopen("C:\\Users\\ThinkPad\\Desktop\\Thesis\\Codes\\Visualization_Algorithms\\Visualization_Algorithms\\Heuristic_Results\\MutationCount.txt", "w");
+	writeOffspringEfficiency = fopen("C:\\Users\\ThinkPad\\Desktop\\Thesis\\Codes\\Visualization_Algorithms\\Visualization_Algorithms\\Heuristic_Results\\OffspringEfficiencyScores.txt", "w");
+	writeafterMutOffEff = fopen("C:\\Users\\ThinkPad\\Desktop\\Thesis\\Codes\\Visualization_Algorithms\\Visualization_Algorithms\\Heuristic_Results\\writeafterMutOffEff.txt", "w");
 	/*Opening the files*/
-
 
 	for (int i = 0; i < numDemand; i++)
 	{

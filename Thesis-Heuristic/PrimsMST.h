@@ -7,6 +7,7 @@
 #include <stdio.h> 
 #include <stdlib.h> 
 
+
 // A structure to represent a node in adjacency list 
 struct AdjListNode {
 	int dest;
@@ -203,16 +204,18 @@ bool isInMinHeap(struct MinHeap* minHeap, int v)
 	return false;
 }
 
-// A utility function used to print the constructed MST 
-void printArr(vector<int> arr, int n)
-{
-	for (int i = 1; i < n; ++i)
-		printf("%d - %d\n", arr[i], i);
+void addFacility(individual& ind, facility fac1, facility fac2) {
+	facility temp_fac;
+	temp_fac.CoordX = (fac1.CoordX + fac2.CoordX) / 2;
+	temp_fac.CoordY = (fac1.CoordY + fac2.CoordY) / 2;
+	temp_fac.facCov = 0;
+	temp_fac.nfacCov = 0;
+	ind.facilitySet.push_back(temp_fac);
 }
 
 // The main function that constructs Minimum Spanning Tree (MST) 
 // using Prim's algorithm 
-int PrimMST(struct PGraph* graph, int index)
+int PrimMST(struct PGraph* graph, individual &ind)
 {
 	int V = graph->V; // Get the number of vertices in graph 
 	std::vector<int> parent; // Array to store constructed MST 
@@ -268,35 +271,91 @@ int PrimMST(struct PGraph* graph, int index)
 	int DC = 1;
 
 	int min = 99999;
-	eadj[index] = 0;
 
 	for (int i = 1; i < key.size(); i++)
 	{
+		//std::cout << parent[i] << " - " << i << std::endl;
 		//cout << "Distance of " << key[i] << endl;
-		if (key[i] > fp)
+		if (key[i] > rc)
 		{
+			if (improvement && key[i] < 2*rc)
+			{
+				addFacility(ind, ind.facilitySet[i], ind.facilitySet[parent[i]]);
+				DC -= 1;
+			}
+
 			DC += 1;			
 		}
-		else
-		{
-			eadj[index] += key[i] / fp;
-			
-			if ((key[i] / fp) < min)
-			{
-				min = key[i] / fp;
-
-				mutated_indices[0] = i - 1; 
-				mutated_indices[1] = i;
-				mutated_distance = key[i];
-			}
-		}
 	}
-
-	eadj[index] = eadj[index] / (key.size() - DC + 1);
-	
-	//printArr(parent, V);
 	//std::cin >> DC;
 	//cout << index << ". eff " << eadj[index] << " Edges: " << key.size() << " DC: " << DC << endl;
 	return DC;
 	
+}
+
+void findCost(population* pop_ptr) {
+
+	starting = clock();
+	int temp_numFac;
+
+	for (int i = 0; i < popSize; i++)
+	{
+		temp_numFac = pop_ptr->ind[i].facilitySet.size();
+
+		if (temp_numFac > 1)
+		{
+
+			struct PGraph* graph = createGraph(temp_numFac);
+
+			for (int j = 0; j < temp_numFac; j++)
+			{
+				facility* temp_facility = &(pop_ptr->ind[i].facilitySet[j]);
+
+				for (int k = j; k < temp_numFac; k++)
+				{
+					if (j != k)
+					{
+						addEdge(graph, j, k, findDistance(
+							temp_facility->CoordX,
+							temp_facility->CoordY,
+							pop_ptr->ind[i].facilitySet[k].CoordX,
+							pop_ptr->ind[i].facilitySet[k].CoordY));
+						/*cout << "Distance btw " << j << "-" << k << findDistance(
+							temp_facility->CoordX,
+							temp_facility->CoordY,
+							pop_ptr->ind_ptr->facilitySet[k].CoordX,
+							pop_ptr->ind_ptr->facilitySet[k].CoordY) << endl;*/
+							/*std::cout << j << ". X: " << temp_facility->CoordX << "-- Y: " << temp_facility->CoordY << std::endl;
+							std::cout << k << ". X: " << ind.facilitySet[k].CoordX << "-- Y: " << ind.facilitySet[k].CoordY << std::endl;
+							std::cout << findDistance(
+								temp_facility->CoordX,
+								temp_facility->CoordY,
+								ind.facilitySet[k].CoordX,
+								ind.facilitySet[k].CoordY) << std::endl;*/
+					}
+				}
+
+			}
+
+			pop_ptr->ind[i].numDC = PrimMST(graph, pop_ptr->ind[i]);
+
+			pop_ptr->ind[i].numRS = pop_ptr->ind[i].facilitySet.size() - pop_ptr->ind[i].numDC;
+			pop_ptr->ind[i].fitness[0] = (pop_ptr->ind[i].numRS) * costRS + (pop_ptr->ind[i].numDC) * costDC;
+
+		}
+		else
+		{
+			pop_ptr->ind[i].numDC = 1;
+			pop_ptr->ind[i].numRS = 0;
+			pop_ptr->ind[i].fitness[0] = (pop_ptr->ind[i].numRS) * costRS + (pop_ptr->ind[i].numDC) * costDC;
+		}
+
+		//std::cout << i << ". SOL: " << ind.fitness[0] << std::endl;
+
+	}
+
+	ending = clock();
+
+	msttime += ExecTime(starting, ending);
+
 }

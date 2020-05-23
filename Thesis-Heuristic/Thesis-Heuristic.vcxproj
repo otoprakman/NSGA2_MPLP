@@ -125,14 +125,17 @@
     </Link>
   </ItemDefinitionGroup>
   <ItemGroup>
+    <ClInclude Include="ConvexHullGraham.h" />
     <ClInclude Include="Functions.h" />
-    <ClInclude Include="GetInput.h" />
+    <ClInclude Include="Crossover.h" />
+    <ClInclude Include="isInsideHull.h" />
+    <ClInclude Include="Mutation.h" />
     <ClInclude Include="PrimsMST.h" />
-    <ClInclude Include="InitRandPopulation.h" />
+    <ClInclude Include="InitialPopulation.h" />
     <ClInclude Include="keepaliven.h" />
     <ClInclude Include="Parameters.h" />
     <ClInclude Include="ReadWriteFiles.h" />
-    <ClInclude Include="select.h" />
+    <ClInclude Include="ParentSelection.h" />
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="Algorithm.cpp" />

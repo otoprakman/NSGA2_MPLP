@@ -1,8 +1,6 @@
 #pragma once
-#include <iostream>
-#include <vector>
-#include <algorithm>
-#include "Parameters.h"
+
+//#include "Parameters.h"
 
 using namespace std;
 
