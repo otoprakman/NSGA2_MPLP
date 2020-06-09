@@ -269,11 +269,12 @@ int PrimMST(struct PGraph* graph, individual &ind)
 	}
 
 	int DC = 1;
-
+	float total = 0;
 	int min = 99999;
 
 	for (int i = 1; i < key.size(); i++)
 	{
+		total += key[i];
 		//std::cout << parent[i] << " - " << i << std::endl;
 		//cout << "Distance of " << key[i] << endl;
 		if (key[i] > rc)
@@ -287,6 +288,7 @@ int PrimMST(struct PGraph* graph, individual &ind)
 			DC += 1;			
 		}
 	}
+	ind.avg_dis = total / (float)key.size();
 	//std::cin >> DC;
 	//cout << index << ". eff " << eadj[index] << " Edges: " << key.size() << " DC: " << DC << endl;
 	return DC;
@@ -301,6 +303,8 @@ void findCost(population* pop_ptr) {
 	for (int i = 0; i < popSize; i++)
 	{
 		temp_numFac = pop_ptr->ind[i].facilitySet.size();
+		
+		pop_ptr->ind[i].avg_dis = 0;
 
 		if (temp_numFac > 1)
 		{
@@ -338,7 +342,6 @@ void findCost(population* pop_ptr) {
 			}
 
 			pop_ptr->ind[i].numDC = PrimMST(graph, pop_ptr->ind[i]);
-
 			pop_ptr->ind[i].numRS = pop_ptr->ind[i].facilitySet.size() - pop_ptr->ind[i].numDC;
 			pop_ptr->ind[i].fitness[0] = (pop_ptr->ind[i].numRS) * costRS + (pop_ptr->ind[i].numDC) * costDC;
 

@@ -28,9 +28,9 @@
 
 int main(int, char**)
 {
-	startingAll = clock();
 
 	int STOP;
+	starting = clock();
 
 	old_pop_ptr = &(oldpop);
 	new_pop_ptr = &(newpop);
@@ -40,9 +40,16 @@ int main(int, char**)
 
 	readWrite();						//Read Demand attributes from the file
 
+	startingAll = clock();
+
 	old_pop_ptr = &(oldpop);
-	initPopulation(old_pop_ptr);		//Generate initial population
+	externalInitPop(old_pop_ptr);		//Generate initial population
+	//initPopulation(old_pop_ptr);		//Generate initial population
 	cout << "Generating Initial Population: COMPLETED" << std::endl;
+	
+	ending = clock();
+
+	initTime = ExecTime(starting, ending);
 	/////*************************************//////
 
 	old_pop_ptr = &(oldpop);
@@ -84,8 +91,20 @@ int main(int, char**)
 	//}
 	//printf("Maximum Rank in Initial Population:%d\n", old_pop_ptr->maxrank);
 
-
 	int maxrank1;
+	fprintf(writeResult, "Gen\t Sol\t Cost\t Cov\t FAC\t DC\t RS\t XCoord\t YCoord\t MSTTime\t FSelectionTime\t TotalTime\t MutationTime\n");
+
+	for (int i = 0; i < popSize; i++)
+	{
+			for (int j = 0; j < old_pop_ptr->ind[i].facilitySet.size(); j++)
+			{
+				fprintf(writeResult, "%d\t %d\t %d\t %d\t %d\t %d\t %d\t %f\t %f\t %f\t %f\t %f\t %f\n", 0, i+1, old_pop_ptr->ind[i].fitness[0] * -1, old_pop_ptr->ind[i].fitness[1],
+					old_pop_ptr->ind[i].facilitySet.size(), old_pop_ptr->ind[i].numDC, old_pop_ptr->ind[i].numRS,
+					old_pop_ptr->ind[i].facilitySet[j].CoordX, old_pop_ptr->ind[i].facilitySet[j].CoordY,
+					msttime, fselectiontime, totaltime, mutationtime);
+			
+			}
+	} 
 
 	 /********************************************************************/			
     /*----------------------GENERATION STARTS HERE----------------------*/			
@@ -102,7 +121,16 @@ int main(int, char**)
 		g_counter += 1;
 
 		//////*****************************/////
-		
+		starting = clock();
+
+		for (int i = 0; i < popSize; i++)
+		{
+			for (int j = 0; j < old_pop_ptr->ind[i].facilitySet.size(); j++)
+			{
+				find_fcov(old_pop_ptr->ind[i].facilitySet[j]);
+			}
+		}
+
 		nselect(old_pop_ptr, mate_pop_ptr);	//Selection for constructing mating pool
 		
 		cout << "Selection for Mating Pool: COMPLETED" << std::endl;
@@ -110,19 +138,23 @@ int main(int, char**)
 		new_pop_ptr = &(newpop);
 		mate_pop_ptr = &(matepop);
 
+		ending = clock();
+
+		selectTime += ExecTime(starting, ending);
+
 		//////*****************************/////
 		
 		//////////----------- Efficiency of Coverage -----------------//////
 
 		if (g == 0)
 		{
-			for (int i = 0; i < popSize; i++)
-			{
-				for (int j = 0; j < old_pop_ptr->ind[i].facilitySet.size(); j++)
-				{
-					find_fcov(old_pop_ptr->ind[i].facilitySet[j]);
-				}
-			}
+		//	for (int i = 0; i < popSize; i++)
+		//	{
+		//		for (int j = 0; j < old_pop_ptr->ind[i].facilitySet.size(); j++)
+		//		{
+		//			find_fcov(old_pop_ptr->ind[i].facilitySet[j]);
+		//		}
+		//	}
 
 			fprintf(writeEfficiency, "mean_encov\t max_encov\t min_encov\t mean_ecov\t max_ecov\t min_ecov\n ");
 		}
@@ -143,6 +175,8 @@ int main(int, char**)
 
 		std::cout << "Mean encov_s: " << mean_encov<< std::endl;
 		std::cout << "Max encov_s: " << max_encov << std::endl;
+		std::cout << "Mean ecov_s: " << mean_ecov << std::endl;
+		std::cout << "Max ecov_s: " << max_ecov << std::endl;
 		fprintf(writeEfficiency, "%f\t %f\t %f\t %f\t %f\t %f\n", mean_encov, max_encov, min_encov, mean_ecov, max_ecov, min_ecov);
 
 		//if (max_encov > 1)			//Alert For an Error Issue
@@ -203,37 +237,11 @@ int main(int, char**)
 			//fprintf(writer, "%f\n", ratio);
 		}
 
-		if (g == 0)
-		{
-			fprintf(writeBeforeSelection, "maxBefore\t meanBefore\t minBefore\n ");
-		}
-
-		fprintf(writeBeforeSelection, "%d\t %f\t %d\n", max3, meanFacility, min3);
-
 		//*************** Mutation ******************
 		m1Count = 0;
 		m2CountS1 = 0;
 		m2CountS2 = 0;
 		m3Count = 0;
-
-		if (g==0)
-		{
-			fprintf(writeOffspringEfficiency, "mean_encov\t max_encov\t min_encov\t mean_ecov\t max_ecov\t min_ecov\n ");
-		}
-		mean_encov = 0.0;
-		max_encov = 0;
-		min_encov = 99999;
-		avg_fac = 0;
-		mean_ecov = 0.0;
-		max_ecov = 0;
-		min_ecov = 99999;
-
-		new_pop_ptr = &(newpop);
-		find_metrics(new_pop_ptr, mean_encov, max_encov, min_encov, avg_fac, mean_ecov, max_ecov, min_ecov);		//encov, avg_fac and ecov metrics
-
-		//cout << "Find Metrics (Ecov, Encov, Average Facility) for OffSpring Population: COMPLETED" << std::endl;
-
-		fprintf(writeOffspringEfficiency, "%f\t %f\t %f\t %f\t %f\t %f\n", mean_encov, max_encov, min_encov, mean_ecov, max_ecov, min_ecov);
 
 		for (int i = 0; i < popSize; i++)
 		{
@@ -251,24 +259,28 @@ int main(int, char**)
 
 				if (ecov[i] > tcov && encov[i] <= tncov && temp_ptr->facilitySet.size() > avg_fac)
 				{
-					M1_mutation(temp_ptr);
+					M1_mutation(temp_ptr);	//DELETE FACILITY
+
 					//std::cout << "M1--MUTATED!!: " << i << std::endl;
 					m1Count += 1;
 				}
 				if (ecov[i] > tcov && encov[i] <= tncov && temp_ptr->facilitySet.size() <= avg_fac)
 				{
-					M2_mutation(temp_ptr);
+					M2_mutation(temp_ptr);	//RELOCATE FACILITY
+
 					//std::cout << "M2--MUTATED!!: " << i << std::endl;
 				}
 				if (ecov[i]<tcov && encov[i] > tncov)
 				{
-					M3_mutation(temp_ptr);
+					M3_mutation(temp_ptr);	//ADD FACILITY
+
 					//std::cout << "M3--MUTATED!!: " << i << std::endl;
 					m3Count += 1;
 				}
 				if (ecov[i] <= tcov && encov[i] <= tncov)
 				{
-					M2_mutation(temp_ptr);
+					M2_mutation(temp_ptr);	//RELOCATE FACILITY
+
 					//std::cout << "M2--MUTATED!!: " << i << std::endl;
 				}
 
@@ -277,35 +289,17 @@ int main(int, char**)
 			}
 		}
 
-		if (g == 0)
-		{
-			fprintf(writeafterMutOffEff, "mean_encov\t max_encov\t min_encov\t mean_ecov\t max_ecov\t min_ecov\n ");
-		}
-		mean_encov = 0.0;
-		max_encov = 0;
-		min_encov = 99999;
-		avg_fac = 0;
-		mean_ecov = 0.0;
-		max_ecov = 0;
-		min_ecov = 99999;
-
-		new_pop_ptr = &(newpop);
-		find_metrics(new_pop_ptr, mean_encov, max_encov, min_encov, avg_fac, mean_ecov, max_ecov, min_ecov);		//encov, avg_fac and ecov metrics
-
-		//cout << "Find Metrics (Ecov, Encov, Average Facility) for OffSpring Population: COMPLETED" << std::endl;
-
-		fprintf(writeafterMutOffEff, "%f\t %f\t %f\t %f\t %f\t %f\n", mean_encov, max_encov, min_encov, mean_ecov, max_ecov, min_ecov);
-
 		new_pop_ptr = &(newpop);
 
 		findCost(new_pop_ptr);			//Find cost objective
-		
+
 		new_pop_ptr = &(newpop);
 		findCoverage(new_pop_ptr);		//Find coverage objective
-		
-		//cout << "Find Cost Objective of Offspring Population: COMPLETED" << std::endl;
 
-		//cout << "Find Coverage Objective of Offspring Population: COMPLETED" << std::endl;
+		cout << "Find Cost Objective of Offspring Population: COMPLETED" << std::endl;
+
+		cout << "Find Coverage Objective of Offspring Population: COMPLETED" << std::endl;
+		
 		//////////////////////////////////////
 
 		//find_numFac(new_pop_ptr);
@@ -335,7 +329,8 @@ int main(int, char**)
 			
 			/*Elitism And Sharing Implemented*/
 			keepalive(old_pop_ptr, new_pop_ptr, last_pop_ptr, g + 1); 
-			//cout << "Non-Dominated Sorting: COMPLETED" << std::endl;
+			cout << "Non-Dominated Sorting: COMPLETED" << std::endl;
+
 	/*		for (int i = 0; i < popSize; i++)
 			{
 				printf("%d-(LAST) RS:%d - DC:%d - FAC:%d - Cost:%d - Cov:%d - Crowd-Dist:%f\n", i + 1, last_pop_ptr->ind[i].numRS, last_pop_ptr->ind[i].numDC,
@@ -370,11 +365,9 @@ int main(int, char**)
 			}
 			if (g == 0)
 			{
-				fprintf(writeAfterSelection, "maxAfter\t meanAfter\t minAfter\n");
 				fprintf(writeMutationCount, "M1\t M2S1\t M2S2\t M3\n");
 
 			}
-			fprintf(writeAfterSelection, "%d\t %f\t %d\n", max2, meanFacility2, min2);
 			fprintf(writeMutationCount, "%d\t %d\t %d\t %d\n", m1Count, m2CountS1, m2CountS2, m3Count);
 
 			/////// LOOK FOR AN ALTERNATIVE INITIALIZATION !!!!
@@ -401,10 +394,6 @@ int main(int, char**)
 
 			if (g % numSnap == 0 || g == ngen-1)
 			{
-				if (g == 0)
-				{
-					fprintf(writeResult, "Gen\t Sol\t Cost\t Cov\t FAC\t DC\t RS\t XCoord\t YCoord\t MSTTime\t FSelectionTime\t TotalTime\t MutationTime\n");
-				}
 
 				int count = 0;
 				for (int i = 0; i < popSize; i++)
@@ -464,6 +453,8 @@ int main(int, char**)
 				/*Copying the flag of the individuals*/
 				old_pop_ptr->ind_ptr->flag = last_pop_ptr->ind_ptr->flag;
 				old_pop_ptr->rankno[j] = last_pop_ptr->rankno[j];
+				old_pop_ptr->ind_ptr->avg_dis = last_pop_ptr->ind_ptr->avg_dis;
+
 			}   // end of j
 
 			old_pop_ptr->maxrank = last_pop_ptr->maxrank;
@@ -486,14 +477,16 @@ int main(int, char**)
 	
 	std::cout << "M1: " << m1Count << " M2S1: " << m2CountS1 << " M2S2: " << m2CountS2 << " M3: " << m3Count << std::endl;
 	std::cout << "END" << endl;
+	std::cout << "Total Distance Calculation= " << findDistTimer << std::endl;
+	std::cout << "Total Time = " << totaltime << std::endl;
+	std::cout << "Total Affine Time = " << affineTime << std::endl;
+	std::cout << "Total InitialGen Time = " << initTime << std::endl;
+	std::cout << "Total Selection Time = " << selectTime << std::endl;
+	std::cout << "Total Coverage Time = " << covTime << std::endl;
 
-	std::fclose(writeBeforeSelection);
-	std::fclose(writeAfterSelection);
 	std::fclose(writeEfficiency);
 	std::fclose(writeResult);
 	std::fclose(writeMutationCount);
-	std::fclose(writeOffspringEfficiency);
-	std::fclose(writeafterMutOffEff);
 
 	if (Plot)
 	{

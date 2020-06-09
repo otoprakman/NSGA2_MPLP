@@ -18,11 +18,11 @@ const int costDC = 4;				//Cost of opening a new DC
 const int costRS = 1;				//Cost of opening a new RS
 const float rd = 1.0;				//Distance for Coverage Constraint
 const float rc = 2.0;				//Distance for Connectivity Constraint
-const int popSize = 50;				//Number of solutions in the solution space (population of the genetic algorithm)
+const int popSize = 5;				//Number of solutions in the solution space (population of the genetic algorithm)
 const float mu = 0.5;				//Generating random numbers from normal distribution, mu is the parameter of the normal dist.
 const float sigma = sqrt(0.5);		//parameter of the normal distribution
 const int ngen = 300;				//Total generation
-const int maxInitFacility = 100;	/*While generating initial population, 
+const int maxInitFacility = 20;		/*While generating initial population, 
 									number of facilities in each solution is randomly determined.
 									This parameter is for the maximum number of facilities in each population.*/
 const int minInitFacility = 1;		//Minimum number of facilities in initial population
@@ -41,8 +41,8 @@ float encov[popSize];				//Nonoverlapping coverage efficiency of an individual
 float avg_fac;						//Mean Facility at the population
 float ecov[popSize];				//Demand coverage efficiency of an individual
 
-float tcov = 0.5;					//Threshold for overlapping coverage
-float tncov = 0.5;					//Threshold for non-overlapping coverage
+float tcov = 0.6;					//Threshold for overlapping coverage
+float tncov = 0.8;					//Threshold for non-overlapping coverage
 
 //////******* COUNT VARIABLES ********//////
 
@@ -54,6 +54,14 @@ int m3Count = 0;
 int g_counter = 0;
 
 //////******* TIME VARIABLES ********//////
+float affineTime = 0;
+float findDistTimer = 0;
+clock_t DistTimer;
+clock_t ender;
+
+float initTime = 0;
+float selectTime = 0;
+float covTime = 0;
 
 float msttime = 0;
 float totaltime = 0;
@@ -92,13 +100,14 @@ typedef struct
 	facility* facility_ptr;
 	int rank,						/*Rank of the individual*/
 		flag;					    /*Flag for ranking*/
+	float avg_dis;				//Average distance between facilities totaldist/(totalfacility-1)
 
 }individual;
 
 typedef struct
 {
 	int rankindices[popSize][popSize];
-	int maxrank;				  /*Maximum rank present in the population*/
+	int maxrank;					  /*Maximum rank present in the population*/
 	int rankno[popSize];			  /*record of no. of individuals at a particular rank*/
 	individual ind[popSize],
 		* ind_ptr;
@@ -107,7 +116,7 @@ typedef struct
 
 typedef struct
 {
-	int maxrank;				 /*Maximum rank that is present in the population*/
+	int maxrank;					 /*Maximum rank that is present in the population*/
 	int rankno[popSize];		     /*record of no. of individuals at a particular rank*/
 	individual ind[popSize*2],
 		* ind_ptr;
@@ -128,3 +137,5 @@ matepop,
 * mate_pop_ptr;
 
 demand demandSet;
+
+

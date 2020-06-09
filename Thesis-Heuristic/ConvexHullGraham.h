@@ -66,30 +66,32 @@ void convexHull(std::vector<facility> &facilitys, int n)
 
         // Place the bottom-most facility at first position
         swap(facilitys[0], facilitys[min]);
-
         // Sort n-1 facilitys with respect to the first facility.  A facility p1 comes
         // before p2 in sorted output if p2 has larger polar angle (in
         // counterclockwise direction) than p1
         p0 = facilitys[0];
         qsort(&facilitys[1], n - 1, sizeof(facility), compareHull);
-
         // Create an empty stack and push first three facilitys to it.
 
         S.push(facilitys[0]);
         S.push(facilitys[1]);
         S.push(facilitys[2]);
-
         // Process remaining n-3 facilitys
         for (int i = 3; i < n; i++)
         {
             // Keep removing top while the angle formed by facilitys next-to-top,
             // top, and facilitys[i] makes a non-left turn
-            while (orientation(nextToTop(S), S.top(), facilitys[i]) != 2)
+            while (orientation(nextToTop(S), S.top(), facilitys[i]) == 1) //If all collinear, it pops all and return error *Orhan
+            {
+                if (orientation(nextToTop(S), S.top(), facilitys[i]) == 0)
+                    std::cout << "Colinear" << std::endl;
                 S.pop();
+                //std::cout << "POPPED" << std::endl;
+            }
             S.push(facilitys[i]);
+            //std::cout << "PUSHED" << std::endl;
             //std::cout << i << ".Added Facilitys CoordX: " << S.top().CoordX << " CoordY: " << S.top().CoordY << std::endl;
         }
-
     } //endof if(n > 3)
     else
     {
@@ -97,7 +99,6 @@ void convexHull(std::vector<facility> &facilitys, int n)
         S.push(facilitys[1]);
         S.push(facilitys[2]);
     }
-
     std::vector<facility> p;
     int c = 0;
     // Now stack has the output facilitys, print contents of stack
@@ -108,7 +109,6 @@ void convexHull(std::vector<facility> &facilitys, int n)
         S.pop();
         c += 1;
     }
-
     //cout << "Mutation-3::Find Convex-Hull: COMPLETED" << std::endl;
 
     std::vector<facility> possible_loc;   //If all facilities are away greater than 2*fp it returns none of possible locations 
@@ -128,7 +128,6 @@ void convexHull(std::vector<facility> &facilitys, int n)
             }
         }
         //cout << "Mutation-3::Generate Possible Facility Locations: COMPLETED" << std::endl;
-
     int max = 0;
     int maxInd = 0;
     if (!possible_loc.empty())     //We may not generate any possible locations if each distance betweem convexhull facilities are greater than 2*fp
@@ -146,12 +145,11 @@ void convexHull(std::vector<facility> &facilitys, int n)
 
             }
         }
-
     facilitys.push_back(possible_loc[maxInd]); //Add max faccov facility to individual
     /*cout << "Add facility CoordX: " << possible_loc[maxInd].CoordX << " CoordY: " << possible_loc[maxInd].CoordY <<
         " FacCov: " << possible_loc[maxInd].facCov <<" New Facility Set size: "<<facilitys.size()<< endl;*/
     }
-    cout << "Mutation-3: COMPLETED" << std::endl;
+    //cout << "Mutation-3: COMPLETED" << std::endl;
 
 }
  

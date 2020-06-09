@@ -13,6 +13,35 @@ int randomNumFacility(int maxFacility, int minInitFacility);			 // Generate rand
 void initPopulation(population* pop_ptr);		 // Locate random number of faciilities to random locations for each individual
 
 
+void externalInitPop(population* pop_ptr) {
+	int counter;
+	float X;
+	float Y;
+
+	std::ifstream inpX("C:\\Users\\ThinkPad\\Desktop\\OrhanC600Opt\\X.txt", std::ifstream::in);
+	std::ifstream inpY("C:\\Users\\ThinkPad\\Desktop\\OrhanC600Opt\\Y.txt", std::ifstream::in);
+	std::ifstream inpCount("C:\\Users\\ThinkPad\\Desktop\\OrhanC600Opt\\count.txt", std::ifstream::in);
+
+	for (int i = 0; i < popSize; i++)
+	{
+		inpCount >> counter;
+		pop_ptr->ind_ptr = &(pop_ptr->ind[i]);
+
+		for (int j = 0; j < counter; j++)
+		{
+			inpX >> X;
+			inpY >> Y;
+			pop_ptr->ind_ptr->facilitySet.push_back({ X, Y, 0, 0 });
+		}
+
+		pop_ptr->ind_ptr->numFac = counter;
+	}
+
+	inpX.close();
+	inpY.close();
+	inpCount.close();
+}
+
 
 void initPopulation(population* pop_ptr)
 {
@@ -25,7 +54,7 @@ void initPopulation(population* pop_ptr)
 
 		for (int j = 0; j < temp_numFac; j++)
 		{
-			pop_ptr->ind_ptr->facilitySet.push_back({ randomLocation(minLoc, maxLoc), randomLocation(minLoc, maxLoc), 0 });
+			pop_ptr->ind_ptr->facilitySet.push_back({ randomLocation(minLoc, maxLoc), randomLocation(minLoc, maxLoc), 0, 0 });
 		}
 
 		pop_ptr->ind_ptr->numFac = temp_numFac;		
@@ -44,7 +73,7 @@ float randomLocation(float minLoc, float maxLoc) {					//Generate random float n
 	return number;
 }
 
-int randomNumFacility(int maxFacility,int minInitFacility) {		//Generate random integer numbers for initial facility numbers in Solutions
+int randomNumFacility(int maxFacility, int minInitFacility) {		//Generate random integer numbers for initial facility numbers in Solutions
 	int number ;
 	
 	std::random_device dev;

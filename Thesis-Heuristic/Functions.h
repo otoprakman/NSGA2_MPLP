@@ -6,7 +6,7 @@ std::uniform_real_distribution<> dist(0.0, 1.0);
 
 float ExecTime(float start, float stop);		// Print Execution Time of a function
 
-facility affine_comb(facility a, facility b);				// Affine Combination of two facilities- generate only one facility
+facility affine_comb(facility a, facility b, float a1, float b1);				// Affine Combination of two facilities- generate only one facility
 
 float findDistance(float a1, float a2, float b1, float b2); // Find Eucledean Distances
 
@@ -40,6 +40,7 @@ void find_metrics(population* pop_ptr, float& mean_encov, float& max_encov, floa
 //##########################################################################
 
 
+
 float ExecTime(float start, float stop)
 {
 	float time_taken = float(stop - start) / float(CLOCKS_PER_SEC);
@@ -62,9 +63,9 @@ void find_metrics(population* pop_ptr, float &mean_encov, float &max_encov, floa
 			total_fcov += pop_ptr->ind[i].facilitySet[j].facCov;
 		}
 
-		encov[i] = 1.00 * pop_ptr->ind[i].fitness[1] / (float)total_fcov;
+		encov[i] = 1.00 * pop_ptr->ind[i].fitness[1] / ((float)total_fcov + smallest);
 
-		ecov[i] = 1.00 * pop_ptr->ind[i].fitness[1] / (float)numDemand;
+		ecov[i] = 1.00 * pop_ptr->ind[i].fitness[1] / ((float)numDemand + smallest);
 
 		mean_encov += encov[i] / (float)popSize;
 		mean_ecov += ecov[i] / (float)popSize;
@@ -132,12 +133,19 @@ void find_fncov(std::vector<facility> &a) {
 }
 
 float findDistance(float a1, float a2, float b1, float b2)
-{	/*Find Euclidean Distances Between two Locations*/
-	return sqrt(pow(a1 - b1, 2) + pow(a2 - b2, 2) * 1.0);
+{
+	float dist = 0;
+	DistTimer = clock();
+	/*Find Euclidean Distances Between two Locations*/
+	dist = sqrt((a1 - b1) * (a1-b1) * 1.0 + (a2 - b2) * (a2 - b2) * 1.0);
+	ender = clock();
+	findDistTimer += ExecTime(DistTimer, ender);
+	return dist;
 }
 
 void findCoverage(population* pop_ptr) {
-	
+	starting = clock();
+
 	pop_ptr->ind_ptr = &(pop_ptr->ind[0]);
 	
 	int temp_numFac,
@@ -169,6 +177,11 @@ void findCoverage(population* pop_ptr) {
 	}
 
 	pop_ptr->ind_ptr = &(pop_ptr->ind[0]);
+
+	ending = clock();
+
+	covTime = ExecTime(starting, ending);
+
 }
 
 
@@ -187,12 +200,17 @@ void move_points(facility &a, facility b, float distance)	//Move a at the direct
 
 }
 
-facility affine_comb(facility a, facility b) 
+facility affine_comb(facility a, facility b, float a1, float b1) 
 {
+	starting = clock();
+	double s = 1 - (a1 + b1) / (double)(4 * rd);
+	if (s < 0.0)s = smallest;
+	if (s >= 0.0)s = s;
+
 	facility c;
 	std::random_device random_device;
 	std::mt19937 random_engine(random_device());
-	std::normal_distribution<float> distribution(mu, sigma);
+	std::normal_distribution<float> distribution(mu, s);
 
 	if (a.CoordX == b.CoordX && a.CoordY == b.CoordY)
 	{
@@ -213,7 +231,12 @@ facility affine_comb(facility a, facility b)
 
 	}
 
+	c.facCov = 0;
+	c.nfacCov = 0;
+
 	/*printf("RETURNED X:%f Y:%f\n", c.CoordX, c.CoordY);*/
+	ending = clock();
+	affineTime += ExecTime(starting, ending);
 
 	return c;
 }

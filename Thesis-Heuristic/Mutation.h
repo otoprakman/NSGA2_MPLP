@@ -20,7 +20,7 @@ void M1_mutation(individual* ind_ptr)
 int M2_step1(individual ind, int index, int pred_index) {
 
 	move_points(ind.facilitySet[index], ind.facilitySet[pred_index], findDistance(ind.facilitySet[index].CoordX, ind.facilitySet[index].CoordY,
-		demandSet.CoordX[pred_index], demandSet.CoordY[pred_index]));
+		ind.facilitySet[pred_index].CoordX, ind.facilitySet[pred_index].CoordY));
 
 	int fcov_new = 0;
 	if (ind.facilitySet[index].CoordX >= 0.0 && ind.facilitySet[index].CoordY >= 0.0)
@@ -94,7 +94,7 @@ void M2_mutation(individual* ind_ptr)
 	{
 		move_points(ind_ptr->facilitySet[glob_index], ind_ptr->facilitySet[glob_pred_node], 
 			findDistance(ind_ptr->facilitySet[glob_index].CoordX, ind_ptr->facilitySet[glob_index].CoordY,
-			demandSet.CoordX[glob_pred_node], demandSet.CoordY[glob_pred_node]));
+			ind_ptr->facilitySet[glob_pred_node].CoordX, ind_ptr->facilitySet[glob_pred_node].CoordY));
 		
 		//cout << "Mutation-2::Moving Facilities for Step-1 : COMPLETED" << std::endl;
 		
@@ -119,6 +119,7 @@ void M3_mutation(individual* ind_ptr) {
 	if (ind_ptr->facilitySet.size() >= 3)
 	{
 		convexHull(ind_ptr->facilitySet, ind_ptr->facilitySet.size());
+		//std::cout << "COMPLETED" << std::endl;
 
 	}
 	
