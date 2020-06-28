@@ -2,33 +2,36 @@
 #include <string>
 #define smallest 0.00000001
 
+//ALGORITHM PARAMETER SETS//
+std::string problemType = "C600";
+std::string facSecType = "Dynamic";
+std::string mutType = "2";
 
 //////******* PARAMETER SETTINGS ********//////
 
 std::string RPath;					// Path of R.exe
 
 const bool Plot = 1;
-const bool adaptive = 1;			//Adaptive Facility Selection
-const bool dynamic = 0;				//Dynamic Facilty Selection
+const bool adaptive = 0;			//Adaptive Facility Selection
+const bool dynamic = 1;				//Dynamic Facilty Selection
 const bool normal = 0;				//Normal Facility Selection
 const bool improvement = 1;			//Use improvement
-const int numSnap = 50;
+const int numSnap = 100;
 
 const int costDC = 4;				//Cost of opening a new DC
 const int costRS = 1;				//Cost of opening a new RS
 const float rd = 1.0;				//Distance for Coverage Constraint
 const float rc = 2.0;				//Distance for Connectivity Constraint
-const int popSize = 5;				//Number of solutions in the solution space (population of the genetic algorithm)
+const int popSize = 50;				//Number of solutions in the solution space (population of the genetic algorithm)
 const float mu = 0.5;				//Generating random numbers from normal distribution, mu is the parameter of the normal dist.
 const float sigma = sqrt(0.5);		//parameter of the normal distribution
-const int ngen = 300;				//Total generation
-const int maxInitFacility = 20;		/*While generating initial population, 
+const int ngen = 1000;				//Total generation
+const int maxInitFacility = 50;		/*While generating initial population, 
 									number of facilities in each solution is randomly determined.
 									This parameter is for the maximum number of facilities in each population.*/
 const int minInitFacility = 1;		//Minimum number of facilities in initial population
 
 //////******* PROBLEM SETTINGS ********//////
-
 const int numDemand = 600;			//Number of Discrete Demand Points
 const float minLoc = 0.0;			//For initial population facilities are randomly placed, 
 const float maxLoc = 10.0;			//hence x-y coordinate limits are defined
@@ -54,16 +57,16 @@ int m3Count = 0;
 int g_counter = 0;
 
 //////******* TIME VARIABLES ********//////
-float affineTime = 0;
+float nondominatedsortTime = 0;
 float findDistTimer = 0;
 clock_t DistTimer;
 clock_t ender;
 
 float initTime = 0;
-float selectTime = 0;
+float crossTime = 0;
 float covTime = 0;
 
-float msttime = 0;
+float costTime = 0;
 float totaltime = 0;
 float fselectiontime = 0;
 float mutationtime = 0;

@@ -1,5 +1,4 @@
 ﻿
-
 std::random_device dev;
 std::mt19937 rng(dev());
 std::uniform_real_distribution<> dist(0.0, 1.0);
@@ -118,6 +117,7 @@ void find_fncov(std::vector<facility> &a) {
 
 	for (int i = 0; i < numDemand; i++)
 	{
+		bool satisfied = 0;
 		for (int j = 0; j < a.size(); j++)
 		{
 			if (findDistance(demandSet.CoordX[i],
@@ -125,8 +125,13 @@ void find_fncov(std::vector<facility> &a) {
 				a[j].CoordX,
 				a[j].CoordY) <= rd)
 			{
-				a[j].nfacCov += 1;
-				break;
+				if (satisfied==0)
+				{
+					a[j].nfacCov += 1;
+					satisfied = 1;
+				}
+				
+				a[j].facCov += 1;
 			}
 		}
 	}
@@ -150,6 +155,7 @@ void findCoverage(population* pop_ptr) {
 	
 	int temp_numFac,
 		coverage;
+	bool satisfied = 0;
 
 	for (int i = 0; i < popSize; i++)
 	{
@@ -158,6 +164,8 @@ void findCoverage(population* pop_ptr) {
 
 		for (int j = 0; j < numDemand; j++)
 		{
+			satisfied = 0;
+
 			for (int k = 0; k < temp_numFac; k++)
 			{
 				
@@ -166,8 +174,14 @@ void findCoverage(population* pop_ptr) {
 					pop_ptr->ind_ptr->facilitySet[k].CoordX,
 					pop_ptr->ind_ptr->facilitySet[k].CoordY) <= rd)
 				{
-					coverage = coverage + demandSet.Value[j];
-					break;
+					if (satisfied==0)
+					{
+						coverage = coverage + demandSet.Value[j];
+						pop_ptr->ind_ptr->facilitySet[k].nfacCov += 1;
+						satisfied = 1;
+					}
+
+					pop_ptr->ind_ptr->facilitySet[k].facCov += 1;
 				}
 			}
 		}
@@ -202,7 +216,6 @@ void move_points(facility &a, facility b, float distance)	//Move a at the direct
 
 facility affine_comb(facility a, facility b, float a1, float b1) 
 {
-	starting = clock();
 	double s = 1 - (a1 + b1) / (double)(4 * rd);
 	if (s < 0.0)s = smallest;
 	if (s >= 0.0)s = s;
@@ -210,7 +223,7 @@ facility affine_comb(facility a, facility b, float a1, float b1)
 	facility c;
 	std::random_device random_device;
 	std::mt19937 random_engine(random_device());
-	std::normal_distribution<float> distribution(mu, s);
+	std::normal_distribution<float> distribution(mu, sigma);
 
 	if (a.CoordX == b.CoordX && a.CoordY == b.CoordY)
 	{
@@ -219,24 +232,26 @@ facility affine_comb(facility a, facility b, float a1, float b1)
 	}
 	else
 	{
-		do
-		{
-			float beta = distribution(random_engine);
+		float beta = distribution(random_engine);
 
-			c.CoordX = a.CoordX * beta + b.CoordX * (1 - beta);
-			c.CoordY = a.CoordY * beta + b.CoordY * (1 - beta);
-			/*if (c.CoordX < 0.0 || c.CoordY < 0.0 || c.CoordX > 10.0 || c.CoordY > 10.0) printf("(Beta:%f)Minus location Detected X:%f - Y:%f X:%f - Y:%f!!\n", beta, a.CoordX, a.CoordY, b.CoordX, b.CoordY);
-			printf("Beta:%f\n", beta);*/
-		} while (c.CoordX < minLoc || c.CoordY < minLoc || c.CoordX > maxLoc || c.CoordY > maxLoc);
-
+		c.CoordX = a.CoordX * beta + b.CoordX * (1 - beta);
+		c.CoordY = a.CoordY * beta + b.CoordY * (1 - beta);
+		/*if (c.CoordX < 0.0 || c.CoordY < 0.0 || c.CoordX > 10.0 || c.CoordY > 10.0) printf("(Beta:%f)Minus location Detected X:%f - Y:%f X:%f - Y:%f!!\n", beta, a.CoordX, a.CoordY, b.CoordX, b.CoordY);
+		printf("Beta:%f\n", beta);*/
+		if (c.CoordX < minLoc)
+			c.CoordX = minLoc;
+		if (c.CoordY < minLoc)
+			c.CoordY = minLoc;
+		if (c.CoordX > maxLoc)
+			c.CoordX = maxLoc;
+		if (c.CoordY > maxLoc)
+			c.CoordY = maxLoc;
 	}
 
 	c.facCov = 0;
 	c.nfacCov = 0;
 
 	/*printf("RETURNED X:%f Y:%f\n", c.CoordX, c.CoordY);*/
-	ending = clock();
-	affineTime += ExecTime(starting, ending);
 
 	return c;
 }
@@ -528,7 +543,6 @@ void sort(int numInd)
 	}
 	return;
 }
-
 
 
 

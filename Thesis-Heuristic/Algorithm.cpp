@@ -43,8 +43,8 @@ int main(int, char**)
 	startingAll = clock();
 
 	old_pop_ptr = &(oldpop);
-	externalInitPop(old_pop_ptr);		//Generate initial population
-	//initPopulation(old_pop_ptr);		//Generate initial population
+	//externalInitPop(old_pop_ptr);		//Generate initial population
+	initPopulation(old_pop_ptr);		//Generate initial population
 	cout << "Generating Initial Population: COMPLETED" << std::endl;
 	
 	ending = clock();
@@ -92,7 +92,7 @@ int main(int, char**)
 	//printf("Maximum Rank in Initial Population:%d\n", old_pop_ptr->maxrank);
 
 	int maxrank1;
-	fprintf(writeResult, "Gen\t Sol\t Cost\t Cov\t FAC\t DC\t RS\t XCoord\t YCoord\t MSTTime\t FSelectionTime\t TotalTime\t MutationTime\n");
+	fprintf(writeResult, "Gen\t Sol\t Cost\t Cov\t FAC\t DC\t RS\t XCoord\t YCoord\t CostTime\t FSelectionTime\t TotalTime\t MutationTime\n");
 
 	for (int i = 0; i < popSize; i++)
 	{
@@ -101,7 +101,7 @@ int main(int, char**)
 				fprintf(writeResult, "%d\t %d\t %d\t %d\t %d\t %d\t %d\t %f\t %f\t %f\t %f\t %f\t %f\n", 0, i+1, old_pop_ptr->ind[i].fitness[0] * -1, old_pop_ptr->ind[i].fitness[1],
 					old_pop_ptr->ind[i].facilitySet.size(), old_pop_ptr->ind[i].numDC, old_pop_ptr->ind[i].numRS,
 					old_pop_ptr->ind[i].facilitySet[j].CoordX, old_pop_ptr->ind[i].facilitySet[j].CoordY,
-					msttime, fselectiontime, totaltime, mutationtime);
+					costTime, fselectiontime, totaltime, mutationtime);
 			
 			}
 	} 
@@ -121,7 +121,6 @@ int main(int, char**)
 		g_counter += 1;
 
 		//////*****************************/////
-		starting = clock();
 
 		for (int i = 0; i < popSize; i++)
 		{
@@ -137,10 +136,6 @@ int main(int, char**)
 
 		new_pop_ptr = &(newpop);
 		mate_pop_ptr = &(matepop);
-
-		ending = clock();
-
-		selectTime += ExecTime(starting, ending);
 
 		//////*****************************/////
 		
@@ -194,8 +189,13 @@ int main(int, char**)
 		//}
 
 		std::cout << "Population Mean Facility: " << avg_fac << std::endl;
+		
+		starting = clock();
 
 		crossover(mate_pop_ptr,new_pop_ptr);	
+		
+		ending = clock();
+		crossTime += ExecTime(starting, ending);
 
 		cout << "Crossover: COMPLETED" << std::endl;
 
@@ -259,7 +259,7 @@ int main(int, char**)
 
 				if (ecov[i] > tcov && encov[i] <= tncov && temp_ptr->facilitySet.size() > avg_fac)
 				{
-					M1_mutation(temp_ptr);	//DELETE FACILITY
+					//M1_mutation(temp_ptr);	//DELETE FACILITY
 
 					//std::cout << "M1--MUTATED!!: " << i << std::endl;
 					m1Count += 1;
@@ -272,7 +272,7 @@ int main(int, char**)
 				}
 				if (ecov[i]<tcov && encov[i] > tncov)
 				{
-					M3_mutation(temp_ptr);	//ADD FACILITY
+					//M3_mutation(temp_ptr);	//ADD FACILITY
 
 					//std::cout << "M3--MUTATED!!: " << i << std::endl;
 					m3Count += 1;
@@ -326,12 +326,14 @@ int main(int, char**)
 						new_pop_ptr->ind[i].facilitySet[j].CoordY);
 				}
 			}*/
-			
+			starting = clock();
 			/*Elitism And Sharing Implemented*/
 			keepalive(old_pop_ptr, new_pop_ptr, last_pop_ptr, g + 1); 
 			cout << "Non-Dominated Sorting: COMPLETED" << std::endl;
-
-	/*		for (int i = 0; i < popSize; i++)
+			
+			ending = clock();
+			nondominatedsortTime += ExecTime(starting, ending);
+		/*	for (int i = 0; i < popSize; i++)
 			{
 				printf("%d-(LAST) RS:%d - DC:%d - FAC:%d - Cost:%d - Cov:%d - Crowd-Dist:%f\n", i + 1, last_pop_ptr->ind[i].numRS, last_pop_ptr->ind[i].numDC,
 					last_pop_ptr->ind[i].numFac, last_pop_ptr->ind[i].fitness[0], last_pop_ptr->ind[i].fitness[1], last_pop_ptr->ind[i].cub_len);
@@ -410,7 +412,7 @@ int main(int, char**)
 							fprintf(writeResult, "%d\t %d\t %d\t %d\t %d\t %d\t %d\t %f\t %f\t %f\t %f\t %f\t %f\n", g + 1, count, last_pop_ptr->ind[i].fitness[0]*-1, last_pop_ptr->ind[i].fitness[1],
 								last_pop_ptr->ind[i].facilitySet.size(), last_pop_ptr->ind[i].numDC, last_pop_ptr->ind[i].numRS,
 								last_pop_ptr->ind[i].facilitySet[j].CoordX, last_pop_ptr->ind[i].facilitySet[j].CoordY,
-								msttime, fselectiontime, totaltime, mutationtime);
+								costTime, fselectiontime, totaltime, mutationtime);
 						}
 					}
 
@@ -479,10 +481,12 @@ int main(int, char**)
 	std::cout << "END" << endl;
 	std::cout << "Total Distance Calculation= " << findDistTimer << std::endl;
 	std::cout << "Total Time = " << totaltime << std::endl;
-	std::cout << "Total Affine Time = " << affineTime << std::endl;
+	std::cout << "Total Cost Time = " << costTime << std::endl;
 	std::cout << "Total InitialGen Time = " << initTime << std::endl;
-	std::cout << "Total Selection Time = " << selectTime << std::endl;
+	std::cout << "Total Crossover Time = " << crossTime << std::endl;
 	std::cout << "Total Coverage Time = " << covTime << std::endl;
+	std::cout << "Total Mutation Time = " << mutationtime << std::endl;
+	std::cout << "Total Non-Dominated Sorting Time = " << nondominatedsortTime << std::endl;
 
 	std::fclose(writeEfficiency);
 	std::fclose(writeResult);

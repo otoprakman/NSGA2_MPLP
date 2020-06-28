@@ -67,16 +67,16 @@ void facility_selection(std::vector<facility> a, int size, individual &offspring
 
 	starting = clock();
 
-	for (int i = 0; i < size; i++)
-	{
-		find_fcov(a[i]);
-	}
+	//for (int i = 0; i < size; i++)
+	//{
+	//	find_fcov(a[i]);
+	//}
 
 	//cout << "CROSSOVER::Find fcov of Offspring Candidate Facilities: COMPLETED" << std::endl;
 
 	//std::sort(a.begin(), a.end(), compare);		//Sort in descending order of facility coverages
 
-	std::random_shuffle(a.begin(), a.end());
+	//std::random_shuffle(a.begin(), a.end());
 
 	//cout << "CROSSOVER::Sort fcov of Offspring Candidate Facilities: COMPLETED" << std::endl;
 

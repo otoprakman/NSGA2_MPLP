@@ -54,7 +54,7 @@ void initPopulation(population* pop_ptr)
 
 		for (int j = 0; j < temp_numFac; j++)
 		{
-			pop_ptr->ind_ptr->facilitySet.push_back({ randomLocation(minLoc, maxLoc), randomLocation(minLoc, maxLoc), 0, 0 });
+			pop_ptr->ind_ptr->facilitySet.push_back({randomLocation(minLoc, maxLoc), randomLocation(minLoc, maxLoc), 0, 0 });
 		}
 
 		pop_ptr->ind_ptr->numFac = temp_numFac;		

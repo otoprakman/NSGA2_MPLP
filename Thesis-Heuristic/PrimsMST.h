@@ -359,6 +359,6 @@ void findCost(population* pop_ptr) {
 
 	ending = clock();
 
-	msttime += ExecTime(starting, ending);
+	costTime += ExecTime(starting, ending);
 
 }
