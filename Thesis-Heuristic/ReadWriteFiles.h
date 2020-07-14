@@ -30,7 +30,7 @@ void createTargetFolder() {
 
 	//std::cout << currentDate <<"-----" << currentDate.substr(0, 10) << currentDate.substr(currentDate.find(":")+1,2)<<std::endl;
 
-	currentDate = currentDate.substr(0, 10)+ currentDate.substr(currentDate.find(":") + 1, 2);
+	currentDate = currentDate.substr(0, 9)+ currentDate.substr(currentDate.find(":") + 1, 2);
 
 	filename = currentDate + "_" + problemType + "_" + facSecType + "_pop" + std::to_string(popSize) + "_init" + std::to_string(maxInitFacility) +
 		"_g" + std::to_string(ngen) + "_m" + mutType + "_tcov" + std::to_string(static_cast<int>(tcov)) + "_tncov" + std::to_string(static_cast<int>(tncov))

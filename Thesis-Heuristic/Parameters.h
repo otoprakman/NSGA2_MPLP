@@ -5,7 +5,7 @@
 //ALGORITHM PARAMETER SETS//
 std::string problemType = "C600";
 std::string facSecType = "Dynamic";
-std::string mutType = "2";
+std::string mutType = "3";
 
 //////******* PARAMETER SETTINGS ********//////
 

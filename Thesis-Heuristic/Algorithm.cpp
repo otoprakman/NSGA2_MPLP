@@ -266,20 +266,20 @@ int main(int, char**)
 				}
 				if (ecov[i] > tcov && encov[i] <= tncov && temp_ptr->facilitySet.size() <= avg_fac)
 				{
-					M2_mutation(temp_ptr);	//RELOCATE FACILITY
+					//M2_mutation(temp_ptr);	//RELOCATE FACILITY
 
 					//std::cout << "M2--MUTATED!!: " << i << std::endl;
 				}
 				if (ecov[i]<tcov && encov[i] > tncov)
 				{
-					//M3_mutation(temp_ptr);	//ADD FACILITY
+					M3_mutation(temp_ptr);	//ADD FACILITY
 
 					//std::cout << "M3--MUTATED!!: " << i << std::endl;
 					m3Count += 1;
 				}
 				if (ecov[i] <= tcov && encov[i] <= tncov)
 				{
-					M2_mutation(temp_ptr);	//RELOCATE FACILITY
+					//M2_mutation(temp_ptr);	//RELOCATE FACILITY
 
 					//std::cout << "M2--MUTATED!!: " << i << std::endl;
 				}
